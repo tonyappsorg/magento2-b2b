@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <body>
+        <!-- form.additional.info is the container Magento_Customer provides inside the register
+             form for exactly this; it renders within the <form> so our fields are submitted. -->
+        <referenceContainer name="form.additional.info">
+            <block class="Tonyapps\B2b\Block\Company\RegisterFieldset"
+                   name="tonyapps_b2b.customer.register.company"
+                   template="Tonyapps_B2b::company/register_fieldset.phtml"/>
+        </referenceContainer>
+    </body>
+</page>

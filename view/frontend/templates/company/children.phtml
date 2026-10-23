@@ -1,0 +1,177 @@
+<?php
+/**
+ * Child companies: the tree below this company, and one form that both adds and edits.
+ *
+ * @var \Tonyapps\B2b\Block\Company\Children $block
+ * @var \Magento\Framework\Escaper $escaper
+ */
+$children = $block->getChildren();
+$canManage = $block->canManage();
+$fields = [
+    'legal_name' => __('Legal Name'),
+    'vat_tax_id' => __('VAT / Tax ID'),
+    'email'      => __('Company Email'),
+    'telephone'  => __('Telephone'),
+    'city'       => __('City'),
+    'region'     => __('State / Province'),
+    'postcode'   => __('Zip / Postal Code'),
+];
+?>
+<div class="block block-company-children">
+    <div class="block-content">
+        <?php if ($children): ?>
+            <div class="table-wrapper">
+                <table class="data table table-company-children">
+                    <caption class="table-caption"><?= $escaper->escapeHtml(__('Child Companies')) ?></caption>
+                    <thead>
+                        <tr>
+                            <th scope="col" class="col name"><?= $escaper->escapeHtml(__('Company')) ?></th>
+                            <th scope="col" class="col email"><?= $escaper->escapeHtml(__('Company Email')) ?></th>
+                            <th scope="col" class="col status"><?= $escaper->escapeHtml(__('Status')) ?></th>
+                            <?php if ($canManage): ?>
+                                <th scope="col" class="col actions">&nbsp;</th>
+                            <?php endif; ?>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <?php foreach ($children as $child): ?>
+                        <tr>
+                            <td data-th="<?= $escaper->escapeHtmlAttr(__('Company')) ?>" class="col name">
+                                <?= str_repeat('&mdash; ', $block->getDepth($child)) ?>
+                                <?= $escaper->escapeHtml($child->getName()) ?>
+                            </td>
+                            <td data-th="<?= $escaper->escapeHtmlAttr(__('Company Email')) ?>" class="col email">
+                                <?= $escaper->escapeHtml((string)$child->getData('email')) ?>
+                            </td>
+                            <td data-th="<?= $escaper->escapeHtmlAttr(__('Status')) ?>" class="col status">
+                                <?= $escaper->escapeHtml($block->getStatusLabel($child)) ?>
+                            </td>
+                            <?php if ($canManage): ?>
+                                <td class="col actions">
+                                    <button type="button" class="action edit"
+                                            data-child-edit="<?= (int)$child->getId() ?>">
+                                        <span><?= $escaper->escapeHtml(__('Edit')) ?></span>
+                                    </button>
+                                </td>
+                            <?php endif; ?>
+                        </tr>
+                    <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+        <?php else: ?>
+            <div class="message info empty"><span><?= $escaper->escapeHtml(
+                __('Your company has no child companies yet.')
+            ) ?></span></div>
+        <?php endif; ?>
+    </div>
+
+    <?php if ($canManage): ?>
+        <form class="form form-company-child" id="company-child-form"
+              action="<?= $escaper->escapeUrl($block->getSaveUrl()) ?>" method="post"
+              data-mage-init='{"validation":{}}'>
+            <?= $block->getBlockHtml('formkey') ?>
+            <input type="hidden" name="company[entity_id]" id="child_entity_id" value="">
+
+            <fieldset class="fieldset">
+                <legend class="legend">
+                    <span id="child-form-title"><?= $escaper->escapeHtml(__('Add a Child Company')) ?></span>
+                </legend><br>
+
+                <div class="field required">
+                    <label class="label" for="child_name"><span><?= $escaper->escapeHtml(__('Company Name')) ?></span></label>
+                    <div class="control">
+                        <input type="text" name="company[name]" id="child_name" class="input-text"
+                               data-validate="{required:true}">
+                    </div>
+                </div>
+
+                <?php foreach ($fields as $code => $label): ?>
+                    <div class="field">
+                        <label class="label" for="child_<?= $escaper->escapeHtmlAttr($code) ?>">
+                            <span><?= $escaper->escapeHtml($label) ?></span>
+                        </label>
+                        <div class="control">
+                            <input type="<?= $code === 'email' ? 'email' : 'text' ?>"
+                                   name="company[<?= $escaper->escapeHtmlAttr($code) ?>]"
+                                   id="child_<?= $escaper->escapeHtmlAttr($code) ?>" class="input-text">
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+
+                <div class="field">
+                    <label class="label" for="child_street"><span><?= $escaper->escapeHtml(__('Street Address')) ?></span></label>
+                    <div class="control">
+                        <textarea name="company[street]" id="child_street" class="input-text" rows="2"></textarea>
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label class="label" for="child_country_id"><span><?= $escaper->escapeHtml(__('Country')) ?></span></label>
+                    <div class="control">
+                        <select name="company[country_id]" id="child_country_id" class="select">
+                            <option value=""><?= $escaper->escapeHtml(__('Please select')) ?></option>
+                            <?php foreach ($block->getCountryOptions() as $option): ?>
+                                <option value="<?= $escaper->escapeHtmlAttr($option['value']) ?>">
+                                    <?= $escaper->escapeHtml($option['label']) ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                </div>
+
+                <p class="note"><?= $escaper->escapeHtml(
+                    __('A child company follows your customer group and pricing. Its users are managed from your own company.')
+                ) ?></p>
+            </fieldset>
+
+            <div class="actions-toolbar">
+                <div class="primary">
+                    <button type="submit" class="action save primary">
+                        <span><?= $escaper->escapeHtml(__('Save Company')) ?></span>
+                    </button>
+                </div>
+                <div class="secondary">
+                    <button type="button" class="action clear" id="child-form-reset" style="display:none;">
+                        <span><?= $escaper->escapeHtml(__('Cancel')) ?></span>
+                    </button>
+                    <a class="action back" href="<?= $escaper->escapeUrl($block->getBackUrl()) ?>">
+                        <span><?= $escaper->escapeHtml(__('Back')) ?></span>
+                    </a>
+                </div>
+            </div>
+        </form>
+
+        <script type="text/javascript">
+            require(['jquery'], function ($) {
+                'use strict';
+
+                var children = <?= /* @noEscape */ $block->getChildrenJson() ?>,
+                    form = $('#company-child-form'),
+                    title = $('#child-form-title'),
+                    cancel = $('#child-form-reset'),
+                    fields = ['name', 'legal_name', 'vat_tax_id', 'email', 'telephone',
+                              'street', 'city', 'region', 'postcode', 'country_id'];
+
+                function fill(child) {
+                    $('#child_entity_id').val(child ? child.entity_id : '');
+                    fields.forEach(function (field) {
+                        $('#child_' + field).val(child ? child[field] : '');
+                    });
+                    title.text(child ? '<?= $escaper->escapeJs(__('Edit Child Company')) ?>'
+                                     : '<?= $escaper->escapeJs(__('Add a Child Company')) ?>');
+                    cancel.toggle(!!child);
+                }
+
+                $('[data-child-edit]').on('click', function () {
+                    fill(children[$(this).data('child-edit')]);
+                    form[0].scrollIntoView({behavior: 'smooth'});
+                });
+
+                cancel.on('click', function () {
+                    fill(null);
+                });
+            });
+        </script>
+    <?php endif; ?>
+</div>

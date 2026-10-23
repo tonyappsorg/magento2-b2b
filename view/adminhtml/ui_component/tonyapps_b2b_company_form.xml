@@ -1,0 +1,237 @@
+<?xml version="1.0"?>
+<form xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd">
+    <argument name="data" xsi:type="array">
+        <item name="js_config" xsi:type="array">
+            <item name="provider" xsi:type="string">tonyapps_b2b_company_form.company_form_data_source</item>
+        </item>
+        <item name="label" xsi:type="string" translate="true">Company Information</item>
+    </argument>
+    <settings>
+        <buttons>
+            <button name="back" class="Tonyapps\B2b\Block\Adminhtml\Company\Edit\BackButton"/>
+            <button name="save" class="Tonyapps\B2b\Block\Adminhtml\Company\Edit\SaveButton"/>
+        </buttons>
+        <namespace>tonyapps_b2b_company_form</namespace>
+        <dataScope>data</dataScope>
+        <deps>
+            <dep>tonyapps_b2b_company_form.company_form_data_source</dep>
+        </deps>
+    </settings>
+
+    <dataSource name="company_form_data_source">
+        <argument name="data" xsi:type="array">
+            <item name="js_config" xsi:type="array">
+                <item name="component" xsi:type="string">Magento_Ui/js/form/provider</item>
+            </item>
+        </argument>
+        <settings>
+            <submitUrl path="tonyapps_b2b/company/save"/>
+        </settings>
+        <dataProvider name="company_form_data_source" class="Tonyapps\B2b\Model\Company\DataProvider">
+            <settings>
+                <requestFieldName>entity_id</requestFieldName>
+                <primaryFieldName>entity_id</primaryFieldName>
+            </settings>
+        </dataProvider>
+    </dataSource>
+
+    <fieldset name="general" sortOrder="10">
+        <settings>
+            <label translate="true">Company Details</label>
+        </settings>
+
+        <field name="entity_id" formElement="hidden">
+            <settings>
+                <dataType>number</dataType>
+            </settings>
+        </field>
+
+        <field name="name" formElement="input" sortOrder="10">
+            <settings>
+                <dataType>text</dataType>
+                <label translate="true">Company Name</label>
+                <validation>
+                    <rule name="required-entry" xsi:type="boolean">true</rule>
+                </validation>
+            </settings>
+        </field>
+        <field name="legal_name" formElement="input" sortOrder="20">
+            <settings>
+                <dataType>text</dataType>
+                <label translate="true">Legal Name</label>
+            </settings>
+        </field>
+        <field name="vat_tax_id" formElement="input" sortOrder="30">
+            <settings>
+                <dataType>text</dataType>
+                <label translate="true">VAT / Tax ID</label>
+            </settings>
+        </field>
+        <field name="email" formElement="input" sortOrder="40">
+            <settings>
+                <dataType>text</dataType>
+                <label translate="true">Company Email</label>
+                <validation>
+                    <rule name="validate-email" xsi:type="boolean">true</rule>
+                </validation>
+            </settings>
+        </field>
+        <field name="telephone" formElement="input" sortOrder="50">
+            <settings>
+                <dataType>text</dataType>
+                <label translate="true">Telephone</label>
+            </settings>
+        </field>
+        <field name="status" formElement="select" sortOrder="60">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="default" xsi:type="number">1</item>
+                </item>
+            </argument>
+            <settings>
+                <dataType>number</dataType>
+                <label translate="true">Status</label>
+            </settings>
+            <formElements>
+                <select>
+                    <settings>
+                        <options class="Tonyapps\B2b\Model\Source\Status"/>
+                    </settings>
+                </select>
+            </formElements>
+        </field>
+        <field name="comment" formElement="textarea" sortOrder="70">
+            <settings>
+                <dataType>text</dataType>
+                <label translate="true">Internal Comment</label>
+                <notice translate="true">Not shown to the customer.</notice>
+            </settings>
+        </field>
+    </fieldset>
+
+    <fieldset name="structure" sortOrder="20">
+        <settings>
+            <label translate="true">Structure &amp; Pricing</label>
+        </settings>
+
+        <field name="parent_id" formElement="select" sortOrder="10">
+            <settings>
+                <dataType>text</dataType>
+                <label translate="true">Parent Company</label>
+                <notice translate="true">A child company inherits settings it does not set itself. Its own children are not offered here.</notice>
+            </settings>
+            <formElements>
+                <select>
+                    <settings>
+                        <options class="Tonyapps\B2b\Model\Source\ParentCompanyList"/>
+                    </settings>
+                </select>
+            </formElements>
+        </field>
+        <field name="customer_group_id" formElement="select" sortOrder="20">
+            <settings>
+                <dataType>text</dataType>
+                <label translate="true">Customer Group</label>
+                <notice translate="true">Applied to every user of this company, and to child companies that do not set their own. Leave empty to inherit from the parent company. Tier prices, catalog and cart price rules then do the rest.</notice>
+            </settings>
+            <formElements>
+                <select>
+                    <settings>
+                        <caption translate="true">Inherit from Parent Company</caption>
+                        <options class="Magento\Customer\Model\Customer\Attribute\Source\Group"/>
+                    </settings>
+                </select>
+            </formElements>
+        </field>
+    </fieldset>
+
+    <fieldset name="payment" sortOrder="25">
+        <settings>
+            <label translate="true">Payment Methods</label>
+        </settings>
+
+        <field name="payment_mode" formElement="select" sortOrder="10">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="default" xsi:type="number">0</item>
+                </item>
+            </argument>
+            <settings>
+                <dataType>number</dataType>
+                <label translate="true">Payment Methods</label>
+                <notice translate="true">Inheriting looks up the hierarchy for the nearest company that has made a decision.</notice>
+            </settings>
+            <formElements>
+                <select>
+                    <settings>
+                        <options class="Tonyapps\B2b\Model\Source\PaymentMode"/>
+                    </settings>
+                </select>
+            </formElements>
+        </field>
+
+        <field name="payment_methods" formElement="multiselect" sortOrder="20">
+            <settings>
+                <dataType>text</dataType>
+                <label translate="true">Allowed Methods</label>
+                <notice translate="true">Only used when the setting above is "Allow only the selected methods". Selecting nothing while restricting leaves the company unable to pay at all.</notice>
+            </settings>
+            <formElements>
+                <multiselect>
+                    <settings>
+                        <options class="Tonyapps\B2b\Model\Source\PaymentMethods"/>
+                        <size>10</size>
+                    </settings>
+                </multiselect>
+            </formElements>
+        </field>
+    </fieldset>
+
+    <fieldset name="address" sortOrder="30">
+        <settings>
+            <label translate="true">Legal Address</label>
+            <collapsible>true</collapsible>
+            <opened>false</opened>
+        </settings>
+
+        <field name="street" formElement="textarea" sortOrder="10">
+            <settings>
+                <dataType>text</dataType>
+                <label translate="true">Street Address</label>
+            </settings>
+        </field>
+        <field name="city" formElement="input" sortOrder="20">
+            <settings>
+                <dataType>text</dataType>
+                <label translate="true">City</label>
+            </settings>
+        </field>
+        <field name="region" formElement="input" sortOrder="30">
+            <settings>
+                <dataType>text</dataType>
+                <label translate="true">State / Province</label>
+            </settings>
+        </field>
+        <field name="postcode" formElement="input" sortOrder="40">
+            <settings>
+                <dataType>text</dataType>
+                <label translate="true">Zip / Postal Code</label>
+            </settings>
+        </field>
+        <field name="country_id" formElement="select" sortOrder="50">
+            <settings>
+                <dataType>text</dataType>
+                <label translate="true">Country</label>
+            </settings>
+            <formElements>
+                <select>
+                    <settings>
+                        <caption translate="true">-- Please Select --</caption>
+                        <options class="Magento\Directory\Model\Config\Source\Country"/>
+                    </settings>
+                </select>
+            </formElements>
+        </field>
+    </fieldset>
+</form>

@@ -1,0 +1,108 @@
+<?php
+/**
+ * Company dashboard.
+ *
+ * @var \Tonyapps\B2b\Block\Company\Dashboard $block
+ * @var \Magento\Framework\Escaper $escaper
+ */
+$company = $block->getCompany();
+if ($company === null) {
+    return;
+}
+?>
+<div class="block block-company">
+    <?php if ($block->isPending()): ?>
+        <div class="message info"><span><?= $escaper->escapeHtml(
+            __('This company is waiting for approval. Until it is approved, company pricing does not apply.')
+        ) ?></span></div>
+    <?php endif; ?>
+
+    <div class="block-title">
+        <strong><?= $escaper->escapeHtml($company->getName()) ?></strong>
+    </div>
+
+    <div class="block-content">
+        <div class="box">
+            <strong class="box-title"><span><?= $escaper->escapeHtml(__('Company Details')) ?></span></strong>
+            <div class="box-content">
+                <dl>
+                    <dt><?= $escaper->escapeHtml(__('Status')) ?></dt>
+                    <dd><?= $escaper->escapeHtml($block->getStatusLabel()) ?></dd>
+
+                    <?php if ($company->getData('legal_name')): ?>
+                        <dt><?= $escaper->escapeHtml(__('Legal Name')) ?></dt>
+                        <dd><?= $escaper->escapeHtml($company->getData('legal_name')) ?></dd>
+                    <?php endif; ?>
+
+                    <?php if ($company->getData('vat_tax_id')): ?>
+                        <dt><?= $escaper->escapeHtml(__('VAT / Tax ID')) ?></dt>
+                        <dd><?= $escaper->escapeHtml($company->getData('vat_tax_id')) ?></dd>
+                    <?php endif; ?>
+
+                    <?php if ($company->getData('email')): ?>
+                        <dt><?= $escaper->escapeHtml(__('Company Email')) ?></dt>
+                        <dd><?= $escaper->escapeHtml($company->getData('email')) ?></dd>
+                    <?php endif; ?>
+
+                    <?php if ($company->getData('telephone')): ?>
+                        <dt><?= $escaper->escapeHtml(__('Telephone')) ?></dt>
+                        <dd><?= $escaper->escapeHtml($company->getData('telephone')) ?></dd>
+                    <?php endif; ?>
+                </dl>
+            </div>
+        </div>
+
+        <?php $addressLines = $block->getAddressLines(); ?>
+        <?php if ($addressLines): ?>
+            <div class="box">
+                <strong class="box-title"><span><?= $escaper->escapeHtml(__('Legal Address')) ?></span></strong>
+                <div class="box-content">
+                    <address>
+                        <?php foreach ($addressLines as $line): ?>
+                            <?= $escaper->escapeHtml($line) ?><br>
+                        <?php endforeach; ?>
+                    </address>
+                </div>
+            </div>
+        <?php endif; ?>
+    </div>
+
+    <?php if ($block->canEditProfile() || $block->canViewUsers() || $block->canViewRoles()
+              || $block->canViewChildren() || $block->canViewCompanyOrders()
+              || $block->canViewCredit()): ?>
+        <div class="actions-toolbar">
+            <div class="primary">
+                <?php if ($block->canEditProfile()): ?>
+                    <a class="action edit primary" href="<?= $escaper->escapeUrl($block->getEditUrl()) ?>">
+                        <span><?= $escaper->escapeHtml(__('Edit Company Profile')) ?></span>
+                    </a>
+                <?php endif; ?>
+                <?php if ($block->canViewUsers()): ?>
+                    <a class="action users" href="<?= $escaper->escapeUrl($block->getUsersUrl()) ?>">
+                        <span><?= $escaper->escapeHtml(__('Company Users')) ?></span>
+                    </a>
+                <?php endif; ?>
+                <?php if ($block->canViewRoles()): ?>
+                    <a class="action roles" href="<?= $escaper->escapeUrl($block->getRolesUrl()) ?>">
+                        <span><?= $escaper->escapeHtml(__('Roles and Permissions')) ?></span>
+                    </a>
+                <?php endif; ?>
+                <?php if ($block->canViewChildren()): ?>
+                    <a class="action children" href="<?= $escaper->escapeUrl($block->getChildrenUrl()) ?>">
+                        <span><?= $escaper->escapeHtml(__('Child Companies')) ?></span>
+                    </a>
+                <?php endif; ?>
+                <?php if ($block->canViewCompanyOrders()): ?>
+                    <a class="action orders" href="<?= $escaper->escapeUrl($block->getCompanyOrdersUrl()) ?>">
+                        <span><?= $escaper->escapeHtml(__('Company Orders')) ?></span>
+                    </a>
+                <?php endif; ?>
+                <?php if ($block->canViewCredit()): ?>
+                    <a class="action credit" href="<?= $escaper->escapeUrl($block->getCreditUrl()) ?>">
+                        <span><?= $escaper->escapeHtml(__('Store Credit')) ?></span>
+                    </a>
+                <?php endif; ?>
+            </div>
+        </div>
+    <?php endif; ?>
+</div>

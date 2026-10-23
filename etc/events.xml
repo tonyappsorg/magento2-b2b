@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd">
+    <!-- Fires for every order however it is created: storefront, admin, or API. -->
+    <event name="sales_order_place_before">
+        <observer name="tonyapps_b2b_stamp_company_on_order"
+                  instance="Tonyapps\B2b\Observer\StampCompanyOnOrder"/>
+    </event>
+
+    <event name="payment_method_is_active">
+        <observer name="tonyapps_b2b_restrict_payment_methods"
+                  instance="Tonyapps\B2b\Observer\RestrictPaymentMethods"/>
+        <observer name="tonyapps_b2b_store_credit_availability"
+                  instance="Tonyapps\B2b\Observer\StoreCreditAvailability"/>
+    </event>
+
+    <!-- Dispatched before Magento saves the order row, so a shortfall stops the order. -->
+    <event name="sales_order_place_after">
+        <observer name="tonyapps_b2b_debit_store_credit"
+                  instance="Tonyapps\B2b\Observer\DebitStoreCreditOnOrder"/>
+    </event>
+
+    <event name="sales_order_creditmemo_refund">
+        <observer name="tonyapps_b2b_refund_store_credit"
+                  instance="Tonyapps\B2b\Observer\RefundStoreCredit"/>
+    </event>
+
+    <event name="order_cancel_after">
+        <observer name="tonyapps_b2b_revert_store_credit"
+                  instance="Tonyapps\B2b\Observer\RevertStoreCreditOnCancel"/>
+    </event>
+</config>

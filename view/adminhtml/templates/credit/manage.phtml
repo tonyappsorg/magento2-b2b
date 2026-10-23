@@ -1,0 +1,127 @@
+<?php
+/**
+ * Admin store credit screen.
+ *
+ * @var \Tonyapps\B2b\Block\Adminhtml\Credit\Manage $block
+ * @var \Magento\Framework\Escaper $escaper
+ */
+$company = $block->getCompany();
+$pool = $block->getPoolCompany();
+?>
+<?php if ($company === null): ?>
+    <div class="message message-error"><?= $escaper->escapeHtml(__('That company no longer exists.')) ?></div>
+<?php else: ?>
+    <div class="admin__page-section">
+        <div class="admin__page-section-title">
+            <span class="title">
+                <?= $escaper->escapeHtml(__('Store Credit: %1', $company->getName())) ?>
+            </span>
+        </div>
+
+        <div class="admin__fieldset">
+            <div class="admin__field">
+                <span class="admin__field-label"><?= $escaper->escapeHtml(__('Current Balance')) ?></span>
+                <div class="admin__field-control">
+                    <strong style="font-size:1.6rem;"><?= $escaper->escapeHtml(number_format($block->getBalance(), 2)) ?></strong>
+                    <?php if ($pool !== null): ?>
+                        <div class="admin__field-note">
+                            <?= $escaper->escapeHtml(
+                                __('This company spends from the pool owned by %1. Adjustments here change that shared balance.', $pool->getName())
+                            ) ?>
+                        </div>
+                    <?php endif; ?>
+                </div>
+            </div>
+        </div>
+
+        <form action="<?= $escaper->escapeUrl($block->getAdjustUrl()) ?>" method="post">
+            <?= $block->getBlockHtml('formkey') ?>
+            <fieldset class="admin__fieldset">
+                <legend class="admin__legend"><span><?= $escaper->escapeHtml(__('Adjust Balance')) ?></span></legend><br>
+
+                <div class="admin__field">
+                    <label class="admin__field-label" for="credit_direction">
+                        <span><?= $escaper->escapeHtml(__('Action')) ?></span>
+                    </label>
+                    <div class="admin__field-control">
+                        <select name="direction" id="credit_direction" class="admin__control-select">
+                            <option value="add"><?= $escaper->escapeHtml(__('Add credit')) ?></option>
+                            <option value="subtract"><?= $escaper->escapeHtml(__('Remove credit')) ?></option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="admin__field required">
+                    <label class="admin__field-label" for="credit_amount">
+                        <span><?= $escaper->escapeHtml(__('Amount')) ?></span>
+                    </label>
+                    <div class="admin__field-control">
+                        <input type="text" name="amount" id="credit_amount" class="admin__control-text" required>
+                        <div class="admin__field-note">
+                            <?= $escaper->escapeHtml(__('In the store base currency. Removing more than the balance is allowed and leaves it negative.')) ?>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="admin__field">
+                    <label class="admin__field-label" for="credit_comment">
+                        <span><?= $escaper->escapeHtml(__('Reason')) ?></span>
+                    </label>
+                    <div class="admin__field-control">
+                        <input type="text" name="comment" id="credit_comment" class="admin__control-text">
+                    </div>
+                </div>
+
+                <div class="admin__field">
+                    <div class="admin__field-control">
+                        <button type="submit" class="action-default primary">
+                            <span><?= $escaper->escapeHtml(__('Apply')) ?></span>
+                        </button>
+                        <a href="<?= $escaper->escapeUrl($block->getCompanyEditUrl()) ?>" class="action-default">
+                            <span><?= $escaper->escapeHtml(__('Edit Company')) ?></span>
+                        </a>
+                        <a href="<?= $escaper->escapeUrl($block->getBackUrl()) ?>" class="action-default">
+                            <span><?= $escaper->escapeHtml(__('Back to Companies')) ?></span>
+                        </a>
+                    </div>
+                </div>
+            </fieldset>
+        </form>
+    </div>
+
+    <?php $history = $block->getHistory(); ?>
+    <div class="admin__page-section">
+        <div class="admin__page-section-title">
+            <span class="title"><?= $escaper->escapeHtml(__('History')) ?></span>
+        </div>
+
+        <?php if ($history): ?>
+            <table class="data-grid">
+                <thead>
+                    <tr>
+                        <th class="data-grid-th"><?= $escaper->escapeHtml(__('Date')) ?></th>
+                        <th class="data-grid-th"><?= $escaper->escapeHtml(__('Reason')) ?></th>
+                        <th class="data-grid-th"><?= $escaper->escapeHtml(__('Order #')) ?></th>
+                        <th class="data-grid-th"><?= $escaper->escapeHtml(__('Comment')) ?></th>
+                        <th class="data-grid-th"><?= $escaper->escapeHtml(__('Amount')) ?></th>
+                        <th class="data-grid-th"><?= $escaper->escapeHtml(__('Balance')) ?></th>
+                    </tr>
+                </thead>
+                <tbody>
+                <?php foreach ($history as $entry): ?>
+                    <tr>
+                        <td class="data-grid-td"><?= $escaper->escapeHtml($block->formatDate($entry['created_at'], \IntlDateFormatter::MEDIUM, true)) ?></td>
+                        <td class="data-grid-td"><?= $escaper->escapeHtml($block->getEntryLabel($entry)) ?></td>
+                        <td class="data-grid-td"><?= $escaper->escapeHtml((string)($entry['order_increment_id'] ?? '')) ?></td>
+                        <td class="data-grid-td"><?= $escaper->escapeHtml((string)($entry['comment'] ?? '')) ?></td>
+                        <td class="data-grid-td"><?= $escaper->escapeHtml(number_format((float)$entry['delta'], 2)) ?></td>
+                        <td class="data-grid-td"><?= $escaper->escapeHtml(number_format((float)$entry['balance_after'], 2)) ?></td>
+                    </tr>
+                <?php endforeach; ?>
+                </tbody>
+            </table>
+        <?php else: ?>
+            <div class="message message-notice"><?= $escaper->escapeHtml(__('No store credit movements yet.')) ?></div>
+        <?php endif; ?>
+    </div>
+<?php endif; ?>

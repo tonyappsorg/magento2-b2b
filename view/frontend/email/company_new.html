@@ -1,0 +1,23 @@
+<!--@subject New company registration: {{var company_name}} @-->
+<!--@vars {
+"var company_name":"Company Name",
+"var company_email":"Company Email",
+"var admin_name":"Company Administrator",
+"var admin_email":"Company Administrator Email",
+"var admin_url":"Link to the company in the admin panel"
+} @-->
+{{template config_path="design/email/header_template"}}
+
+<p>{{trans "A new company has registered on the storefront and is waiting for approval."}}</p>
+
+<table class="message-details">
+    <tr><td>{{trans "Company"}}</td><td>{{var company_name}}</td></tr>
+    <tr><td>{{trans "Company email"}}</td><td>{{var company_email}}</td></tr>
+    <tr><td>{{trans "Administrator"}}</td><td>{{var admin_name}} &lt;{{var admin_email}}&gt;</td></tr>
+</table>
+
+<p><a href="{{var admin_url}}">{{trans "Review this company"}}</a></p>
+
+<p>{{trans "Until it is approved, its users keep the default customer group and do not get company pricing."}}</p>
+
+{{template config_path="design/email/footer_template"}}

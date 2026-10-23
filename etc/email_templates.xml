@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Email:etc/email_templates.xsd">
+    <template id="tonyapps_b2b_email_new_company_template" label="New Company Registered"
+              file="company_new.html" type="html" module="Tonyapps_B2b" area="frontend"/>
+    <template id="tonyapps_b2b_email_approved_template" label="Company Approved"
+              file="company_approved.html" type="html" module="Tonyapps_B2b" area="frontend"/>
+    <template id="tonyapps_b2b_email_rejected_template" label="Company Rejected"
+              file="company_rejected.html" type="html" module="Tonyapps_B2b" area="frontend"/>
+</config>

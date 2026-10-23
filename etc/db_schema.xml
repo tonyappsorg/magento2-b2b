@@ -1,0 +1,170 @@
+<?xml version="1.0"?>
+<schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Setup/Declaration/Schema/etc/schema.xsd">
+    <table name="tonyapps_b2b_company" resource="default" engine="innodb" comment="B2B Companies">
+        <column xsi:type="int" name="entity_id" unsigned="true" nullable="false" identity="true" comment="Company ID"/>
+        <column xsi:type="int" name="parent_id" unsigned="true" nullable="true" comment="Parent Company ID"/>
+        <column xsi:type="varchar" name="path" nullable="true" length="255"
+                comment="Materialized path of company IDs, e.g. 1/4/9; first segment is the root company"/>
+        <column xsi:type="smallint" name="level" unsigned="true" nullable="false" default="0"
+                comment="Depth in the hierarchy; 0 = root"/>
+        <column xsi:type="varchar" name="name" nullable="false" length="255" comment="Company Name"/>
+        <column xsi:type="varchar" name="legal_name" nullable="true" length="255" comment="Legal Name"/>
+        <column xsi:type="varchar" name="vat_tax_id" nullable="true" length="64" comment="VAT / Tax ID"/>
+        <column xsi:type="varchar" name="email" nullable="true" length="255" comment="Company Email"/>
+        <column xsi:type="varchar" name="telephone" nullable="true" length="64" comment="Telephone"/>
+        <column xsi:type="text" name="street" nullable="true" comment="Street"/>
+        <column xsi:type="varchar" name="city" nullable="true" length="255" comment="City"/>
+        <column xsi:type="int" name="region_id" unsigned="true" nullable="true" comment="Region ID"/>
+        <column xsi:type="varchar" name="region" nullable="true" length="255" comment="Region (free text)"/>
+        <column xsi:type="varchar" name="postcode" nullable="true" length="32" comment="Postcode"/>
+        <column xsi:type="varchar" name="country_id" nullable="true" length="4" comment="Country ID"/>
+        <column xsi:type="smallint" name="status" unsigned="true" nullable="false" default="0"
+                comment="0 pending | 1 active | 2 rejected | 3 blocked"/>
+        <column xsi:type="int" name="customer_group_id" unsigned="true" nullable="true"
+                comment="Customer group applied to members; NULL = inherit from parent"/>
+        <column xsi:type="int" name="admin_customer_id" unsigned="true" nullable="true"
+                comment="Customer acting as company administrator"/>
+        <column xsi:type="smallint" name="payment_mode" unsigned="true" nullable="false" default="0"
+                comment="0 inherit from parent | 1 allow every method | 2 allow only the listed methods"/>
+        <column xsi:type="decimal" name="credit_balance" scale="4" precision="20" unsigned="false"
+                nullable="false" default="0"
+                comment="Store credit, in base currency. Only meaningful on a root company: every descendant spends from the root's pool"/>
+        <column xsi:type="text" name="comment" nullable="true" comment="Internal Comment"/>
+        <column xsi:type="timestamp" name="created_at" nullable="false" default="CURRENT_TIMESTAMP" comment="Created At"/>
+        <column xsi:type="timestamp" name="updated_at" nullable="false" default="CURRENT_TIMESTAMP"
+                on_update="true" comment="Updated At"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="entity_id"/>
+        </constraint>
+        <constraint xsi:type="foreign" referenceId="TONYAPPS_B2B_COMPANY_PARENT_ID_TONYAPPS_B2B_COMPANY_ENTITY_ID"
+                    table="tonyapps_b2b_company" column="parent_id"
+                    referenceTable="tonyapps_b2b_company" referenceColumn="entity_id" onDelete="SET NULL"/>
+        <constraint xsi:type="foreign" referenceId="TONYAPPS_B2B_COMPANY_ADMIN_CUSTOMER_ID_CUSTOMER_ENTITY_ENTITY_ID"
+                    table="tonyapps_b2b_company" column="admin_customer_id"
+                    referenceTable="customer_entity" referenceColumn="entity_id" onDelete="SET NULL"/>
+        <index referenceId="TONYAPPS_B2B_COMPANY_PATH" indexType="btree">
+            <column name="path"/>
+        </index>
+        <index referenceId="TONYAPPS_B2B_COMPANY_STATUS" indexType="btree">
+            <column name="status"/>
+        </index>
+        <index referenceId="TONYAPPS_B2B_COMPANY_NAME" indexType="fulltext">
+            <column name="name"/>
+        </index>
+    </table>
+
+    <table name="tonyapps_b2b_company_customer" resource="default" engine="innodb"
+           comment="Customer to company membership (one company per customer)">
+        <column xsi:type="int" name="customer_id" unsigned="true" nullable="false" comment="Customer ID"/>
+        <column xsi:type="int" name="company_id" unsigned="true" nullable="false" comment="Company ID"/>
+        <column xsi:type="int" name="role_id" unsigned="true" nullable="true"
+                comment="Role within the company; NULL falls back to the company default role"/>
+        <column xsi:type="timestamp" name="created_at" nullable="false" default="CURRENT_TIMESTAMP" comment="Joined At"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="customer_id"/>
+        </constraint>
+        <constraint xsi:type="foreign" referenceId="TONYAPPS_B2B_COMPANY_CUSTOMER_CUSTOMER_ID_CUSTOMER_ENTITY_ENTITY_ID"
+                    table="tonyapps_b2b_company_customer" column="customer_id"
+                    referenceTable="customer_entity" referenceColumn="entity_id" onDelete="CASCADE"/>
+        <constraint xsi:type="foreign" referenceId="TONYAPPS_B2B_COMPANY_CUSTOMER_COMPANY_ID_TONYAPPS_B2B_COMPANY_ENT_ID"
+                    table="tonyapps_b2b_company_customer" column="company_id"
+                    referenceTable="tonyapps_b2b_company" referenceColumn="entity_id" onDelete="CASCADE"/>
+        <constraint xsi:type="foreign" referenceId="TONYAPPS_B2B_COMPANY_CUSTOMER_ROLE_ID_TONYAPPS_B2B_ROLE_ROLE_ID"
+                    table="tonyapps_b2b_company_customer" column="role_id"
+                    referenceTable="tonyapps_b2b_role" referenceColumn="role_id" onDelete="SET NULL"/>
+        <index referenceId="TONYAPPS_B2B_COMPANY_CUSTOMER_COMPANY_ID" indexType="btree">
+            <column name="company_id"/>
+        </index>
+    </table>
+
+    <table name="tonyapps_b2b_role" resource="default" engine="innodb" comment="B2B Company Roles">
+        <column xsi:type="int" name="role_id" unsigned="true" nullable="false" identity="true" comment="Role ID"/>
+        <column xsi:type="int" name="company_id" unsigned="true" nullable="false" comment="Company the role belongs to"/>
+        <column xsi:type="varchar" name="role_name" nullable="false" length="255" comment="Role Name"/>
+        <column xsi:type="smallint" name="is_default" unsigned="true" nullable="false" default="0"
+                comment="Role given to members who have none of their own"/>
+        <column xsi:type="text" name="permissions" nullable="true"
+                comment="Comma-separated permission resource IDs the role grants; anything absent is denied"/>
+        <column xsi:type="timestamp" name="created_at" nullable="false" default="CURRENT_TIMESTAMP" comment="Created At"/>
+        <column xsi:type="timestamp" name="updated_at" nullable="false" default="CURRENT_TIMESTAMP"
+                on_update="true" comment="Updated At"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="role_id"/>
+        </constraint>
+        <constraint xsi:type="foreign" referenceId="TONYAPPS_B2B_ROLE_COMPANY_ID_TONYAPPS_B2B_COMPANY_ENTITY_ID"
+                    table="tonyapps_b2b_role" column="company_id"
+                    referenceTable="tonyapps_b2b_company" referenceColumn="entity_id" onDelete="CASCADE"/>
+        <index referenceId="TONYAPPS_B2B_ROLE_COMPANY_ID" indexType="btree">
+            <column name="company_id"/>
+        </index>
+    </table>
+    <!--
+        The company an order was placed for, stamped at checkout. Kept on the order rather than
+        looked up from the customer's current membership: someone who later changes company must
+        not drag their old orders into the new company's view, nor lose them from the old one.
+    -->
+    <table name="tonyapps_b2b_credit_history" resource="default" engine="innodb"
+           comment="Every movement of a company's store credit">
+        <column xsi:type="int" name="entity_id" unsigned="true" nullable="false" identity="true" comment="Entry ID"/>
+        <column xsi:type="int" name="company_id" unsigned="true" nullable="false"
+                comment="Root company owning the pool"/>
+        <column xsi:type="decimal" name="delta" scale="4" precision="20" unsigned="false" nullable="false"
+                comment="Signed amount: negative spends, positive adds"/>
+        <column xsi:type="decimal" name="balance_after" scale="4" precision="20" unsigned="false"
+                nullable="false" comment="Balance once this entry was applied"/>
+        <column xsi:type="varchar" name="type" nullable="false" length="32"
+                comment="adjust | order | refund | revert"/>
+        <column xsi:type="int" name="order_id" unsigned="true" nullable="true" comment="Order this entry relates to"/>
+        <column xsi:type="varchar" name="order_increment_id" nullable="true" length="64"
+                comment="Order number, kept so history survives the order being removed"/>
+        <column xsi:type="text" name="comment" nullable="true" comment="Reason"/>
+        <column xsi:type="int" name="admin_user_id" unsigned="true" nullable="true"
+                comment="Administrator who made a manual adjustment"/>
+        <column xsi:type="int" name="customer_id" unsigned="true" nullable="true"
+                comment="Customer whose action caused this entry"/>
+        <column xsi:type="timestamp" name="created_at" nullable="false" default="CURRENT_TIMESTAMP" comment="Created At"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="entity_id"/>
+        </constraint>
+        <constraint xsi:type="foreign" referenceId="TONYAPPS_B2B_CREDIT_HISTORY_COMPANY_ID_TONYAPPS_B2B_COMPANY_ENT_ID"
+                    table="tonyapps_b2b_credit_history" column="company_id"
+                    referenceTable="tonyapps_b2b_company" referenceColumn="entity_id" onDelete="CASCADE"/>
+        <index referenceId="TONYAPPS_B2B_CREDIT_HISTORY_COMPANY_ID_CREATED_AT" indexType="btree">
+            <column name="company_id"/>
+            <column name="created_at"/>
+        </index>
+        <index referenceId="TONYAPPS_B2B_CREDIT_HISTORY_ORDER_ID" indexType="btree">
+            <column name="order_id"/>
+        </index>
+    </table>
+
+    <table name="tonyapps_b2b_company_payment" resource="default" engine="innodb"
+           comment="Payment methods a company is allowed to use (only read when payment_mode = 2)">
+        <column xsi:type="int" name="company_id" unsigned="true" nullable="false" comment="Company ID"/>
+        <column xsi:type="varchar" name="method_code" nullable="false" length="128" comment="Payment method code"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="company_id"/>
+            <column name="method_code"/>
+        </constraint>
+        <constraint xsi:type="foreign" referenceId="TONYAPPS_B2B_COMPANY_PAYMENT_COMPANY_ID_TONYAPPS_B2B_COMPANY_ENT_ID"
+                    table="tonyapps_b2b_company_payment" column="company_id"
+                    referenceTable="tonyapps_b2b_company" referenceColumn="entity_id" onDelete="CASCADE"/>
+    </table>
+
+    <table name="sales_order" resource="sales" engine="innodb">
+        <column xsi:type="int" name="company_id" unsigned="true" nullable="true"
+                comment="B2B company the order was placed for"/>
+        <index referenceId="TONYAPPS_B2B_SALES_ORDER_COMPANY_ID" indexType="btree">
+            <column name="company_id"/>
+        </index>
+    </table>
+
+    <table name="sales_order_grid" resource="sales" engine="innodb">
+        <column xsi:type="int" name="company_id" unsigned="true" nullable="true"
+                comment="B2B company the order was placed for"/>
+        <index referenceId="TONYAPPS_B2B_SALES_ORDER_GRID_COMPANY_ID" indexType="btree">
+            <column name="company_id"/>
+        </index>
+    </table>
+</schema>

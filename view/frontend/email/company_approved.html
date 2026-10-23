@@ -1,0 +1,15 @@
+<!--@subject Your company account for {{var company_name}} is approved @-->
+<!--@vars {
+"var company_name":"Company Name",
+"var admin_name":"Company Administrator",
+"var company_url":"Link to the company dashboard"
+} @-->
+{{template config_path="design/email/header_template"}}
+
+<p>{{trans "%name," name=$admin_name}}</p>
+
+<p>{{trans "Your company account for %company has been approved." company=$company_name}}</p>
+
+<p><a href="{{var company_url}}">{{trans "Go to your company dashboard"}}</a></p>
+
+{{template config_path="design/email/footer_template"}}

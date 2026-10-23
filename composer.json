@@ -1,0 +1,23 @@
+{
+    "name": "tonyapps/module-b2b",
+    "description": "B2B company accounts for Magento 2.4 Open Source (companies, hierarchy, roles, payment restrictions, store credit)",
+    "type": "magento2-module",
+    "version": "0.1.0",
+    "license": "proprietary",
+    "require": {
+        "php": ">=8.3",
+        "magento/framework": "*",
+        "magento/module-backend": "*",
+        "magento/module-config": "*",
+        "magento/module-customer": "*",
+        "magento/module-directory": "*",
+        "magento/module-store": "*",
+        "magento/module-ui": "*"
+    },
+    "autoload": {
+        "files": ["registration.php"],
+        "psr-4": {
+            "Tonyapps\\B2b\\": ""
+        }
+    }
+}

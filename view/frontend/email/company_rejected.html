@@ -1,0 +1,14 @@
+<!--@subject About your company account request for {{var company_name}} @-->
+<!--@vars {
+"var company_name":"Company Name",
+"var admin_name":"Company Administrator"
+} @-->
+{{template config_path="design/email/header_template"}}
+
+<p>{{trans "%name," name=$admin_name}}</p>
+
+<p>{{trans "We are unable to approve the company account request for %company at this time." company=$company_name}}</p>
+
+<p>{{trans "Your personal account is unaffected and you can continue to shop as usual. Please contact us if you would like to discuss this."}}</p>
+
+{{template config_path="design/email/footer_template"}}

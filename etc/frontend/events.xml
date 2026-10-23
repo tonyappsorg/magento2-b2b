@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd">
+    <event name="customer_register_success">
+        <observer name="tonyapps_b2b_create_company_on_register"
+                  instance="Tonyapps\B2b\Observer\CreateCompanyOnRegister"/>
+    </event>
+</config>

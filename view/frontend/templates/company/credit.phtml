@@ -1,0 +1,84 @@
+<?php
+/**
+ * Store credit: balance and recent movements.
+ *
+ * @var \Tonyapps\B2b\Block\Company\Credit $block
+ * @var \Magento\Framework\Escaper $escaper
+ */
+$history = $block->getHistory();
+?>
+<div class="block block-company-credit">
+    <div class="block-content">
+        <div class="box box-credit-balance">
+            <strong class="box-title"><span><?= $escaper->escapeHtml(__('Available Balance')) ?></span></strong>
+            <div class="box-content">
+                <p class="credit-balance">
+                    <strong><?= $escaper->escapeHtml($block->formatAmount($block->getBalance())) ?></strong>
+                </p>
+                <?php if ($block->isSharedPool()): ?>
+                    <p class="note"><?= $escaper->escapeHtml(
+                        __('This balance is shared with your parent company and everyone below it.')
+                    ) ?></p>
+                <?php endif; ?>
+                <p class="note"><?= $escaper->escapeHtml(
+                    __('Store credit can be used at checkout when it covers the whole order.')
+                ) ?></p>
+            </div>
+        </div>
+
+        <?php if ($history): ?>
+            <div class="table-wrapper">
+                <table class="data table table-company-credit">
+                    <caption class="table-caption"><?= $escaper->escapeHtml(__('Recent Movements')) ?></caption>
+                    <thead>
+                        <tr>
+                            <th scope="col" class="col date"><?= $escaper->escapeHtml(__('Date')) ?></th>
+                            <th scope="col" class="col type"><?= $escaper->escapeHtml(__('Reason')) ?></th>
+                            <th scope="col" class="col order"><?= $escaper->escapeHtml(__('Order #')) ?></th>
+                            <th scope="col" class="col amount"><?= $escaper->escapeHtml(__('Amount')) ?></th>
+                            <th scope="col" class="col balance"><?= $escaper->escapeHtml(__('Balance')) ?></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <?php foreach ($history as $entry): ?>
+                        <tr>
+                            <td data-th="<?= $escaper->escapeHtmlAttr(__('Date')) ?>" class="col date">
+                                <?= $escaper->escapeHtml($block->formatDate($entry['created_at'])) ?>
+                            </td>
+                            <td data-th="<?= $escaper->escapeHtmlAttr(__('Reason')) ?>" class="col type">
+                                <?= $escaper->escapeHtml($block->getEntryLabel($entry)) ?>
+                                <?php if (!empty($entry['comment'])): ?>
+                                    <span class="credit-comment">
+                                        &mdash; <?= $escaper->escapeHtml($entry['comment']) ?>
+                                    </span>
+                                <?php endif; ?>
+                            </td>
+                            <td data-th="<?= $escaper->escapeHtmlAttr(__('Order #')) ?>" class="col order">
+                                <?= $escaper->escapeHtml((string)($entry['order_increment_id'] ?? '')) ?>
+                            </td>
+                            <td data-th="<?= $escaper->escapeHtmlAttr(__('Amount')) ?>" class="col amount">
+                                <?= $escaper->escapeHtml($block->formatAmount((float)$entry['delta'])) ?>
+                            </td>
+                            <td data-th="<?= $escaper->escapeHtmlAttr(__('Balance')) ?>" class="col balance">
+                                <?= $escaper->escapeHtml($block->formatAmount((float)$entry['balance_after'])) ?>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+        <?php else: ?>
+            <div class="message info empty"><span><?= $escaper->escapeHtml(
+                __('There are no store credit movements yet.')
+            ) ?></span></div>
+        <?php endif; ?>
+    </div>
+
+    <div class="actions-toolbar">
+        <div class="secondary">
+            <a class="action back" href="<?= $escaper->escapeUrl($block->getBackUrl()) ?>">
+                <span><?= $escaper->escapeHtml(__('Back')) ?></span>
+            </a>
+        </div>
+    </div>
+</div>

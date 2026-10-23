@@ -1,0 +1,70 @@
+<?php
+/**
+ * Orders placed across the company and everything below it.
+ *
+ * @var \Tonyapps\B2b\Block\Company\Orders $block
+ * @var \Magento\Framework\Escaper $escaper
+ */
+$orders = $block->getOrders();
+$companyNames = $block->getCompanyNames();
+?>
+<div class="block block-company-orders">
+    <div class="block-content">
+        <?php if (count($orders)): ?>
+            <div class="table-wrapper orders-history">
+                <table class="data table table-order-items history">
+                    <caption class="table-caption"><?= $escaper->escapeHtml(__('Company Orders')) ?></caption>
+                    <thead>
+                        <tr>
+                            <th scope="col" class="col id"><?= $escaper->escapeHtml(__('Order #')) ?></th>
+                            <th scope="col" class="col date"><?= $escaper->escapeHtml(__('Date')) ?></th>
+                            <th scope="col" class="col company"><?= $escaper->escapeHtml(__('Company')) ?></th>
+                            <th scope="col" class="col total"><?= $escaper->escapeHtml(__('Order Total')) ?></th>
+                            <th scope="col" class="col status"><?= $escaper->escapeHtml(__('Status')) ?></th>
+                            <th scope="col" class="col actions">&nbsp;</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <?php foreach ($orders as $order): ?>
+                        <tr>
+                            <td data-th="<?= $escaper->escapeHtmlAttr(__('Order #')) ?>" class="col id">
+                                <?= $escaper->escapeHtml($order->getIncrementId()) ?>
+                            </td>
+                            <td data-th="<?= $escaper->escapeHtmlAttr(__('Date')) ?>" class="col date">
+                                <?= $escaper->escapeHtml($block->formatDate($order->getCreatedAt())) ?>
+                            </td>
+                            <td data-th="<?= $escaper->escapeHtmlAttr(__('Company')) ?>" class="col company">
+                                <?= $escaper->escapeHtml($companyNames[(int)$order->getData('company_id')] ?? '') ?>
+                            </td>
+                            <td data-th="<?= $escaper->escapeHtmlAttr(__('Order Total')) ?>" class="col total">
+                                <?= /* @noEscape */ $order->formatPrice($order->getGrandTotal()) ?>
+                            </td>
+                            <td data-th="<?= $escaper->escapeHtmlAttr(__('Status')) ?>" class="col status">
+                                <?= $escaper->escapeHtml($order->getStatusLabel()) ?>
+                            </td>
+                            <td class="col actions">
+                                <a href="<?= $escaper->escapeUrl($block->getViewUrl($order)) ?>" class="action view">
+                                    <span><?= $escaper->escapeHtml(__('View Order')) ?></span>
+                                </a>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+            <?= $block->getPagerHtml() ?>
+        <?php else: ?>
+            <div class="message info empty"><span><?= $escaper->escapeHtml(
+                __('No orders have been placed by your company yet.')
+            ) ?></span></div>
+        <?php endif; ?>
+    </div>
+
+    <div class="actions-toolbar">
+        <div class="secondary">
+            <a class="action back" href="<?= $escaper->escapeUrl($block->getBackUrl()) ?>">
+                <span><?= $escaper->escapeHtml(__('Back')) ?></span>
+            </a>
+        </div>
+    </div>
+</div>

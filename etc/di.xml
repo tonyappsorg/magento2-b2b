@@ -1,0 +1,95 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+
+    <preference for="Tonyapps\B2b\Api\Data\CompanyInterface"
+                type="Tonyapps\B2b\Model\Company"/>
+    <preference for="Tonyapps\B2b\Api\CompanyRepositoryInterface"
+                type="Tonyapps\B2b\Model\CompanyRepository"/>
+    <preference for="Tonyapps\B2b\Api\MembershipManagementInterface"
+                type="Tonyapps\B2b\Model\Membership"/>
+    <preference for="Tonyapps\B2b\Api\Data\RoleInterface"
+                type="Tonyapps\B2b\Model\Role"/>
+    <preference for="Tonyapps\B2b\Api\RoleRepositoryInterface"
+                type="Tonyapps\B2b\Model\RoleRepository"/>
+
+    <!-- Parent-company select: never offer the company's own subtree. -->
+    <virtualType name="Tonyapps\B2b\Model\Source\ParentCompanyList" type="Tonyapps\B2b\Model\Source\CompanyList">
+        <arguments>
+            <argument name="excludeCurrentSubtree" xsi:type="boolean">true</argument>
+            <argument name="emptyLabel" xsi:type="string">No Parent Company</argument>
+        </arguments>
+    </virtualType>
+
+    <!-- Company select on the customer form: any company, plus a blank "not a company user". -->
+    <virtualType name="Tonyapps\B2b\Model\Source\CustomerCompanyList" type="Tonyapps\B2b\Model\Source\CompanyList">
+        <arguments>
+            <argument name="emptyLabel" xsi:type="string">Not a Company User</argument>
+        </arguments>
+    </virtualType>
+
+    <type name="Tonyapps\B2b\Model\ResourceModel\Company\Grid\Collection">
+        <arguments>
+            <argument name="mainTable" xsi:type="string">tonyapps_b2b_company</argument>
+            <argument name="resourceModel" xsi:type="string">Tonyapps\B2b\Model\ResourceModel\Company</argument>
+            <argument name="eventPrefix" xsi:type="string">tonyapps_b2b_company_grid_collection</argument>
+            <argument name="eventObject" xsi:type="string">company_grid_collection</argument>
+        </arguments>
+    </type>
+
+    <type name="Tonyapps\B2b\Model\ResourceModel\Role\Grid\Collection">
+        <arguments>
+            <argument name="mainTable" xsi:type="string">tonyapps_b2b_role</argument>
+            <argument name="resourceModel" xsi:type="string">Tonyapps\B2b\Model\ResourceModel\Role</argument>
+            <argument name="eventPrefix" xsi:type="string">tonyapps_b2b_role_grid_collection</argument>
+            <argument name="eventObject" xsi:type="string">role_grid_collection</argument>
+        </arguments>
+    </type>
+
+    <!-- The store credit payment method: a virtual type of the payment Adapter, which is the
+         supported way to add an offline method now that AbstractMethod is deprecated. It needs no
+         command pool because it performs no gateway action. -->
+    <virtualType name="TonyappsB2bStoreCreditConfig" type="Magento\Payment\Gateway\Config\Config">
+        <arguments>
+            <argument name="methodCode" xsi:type="const">Tonyapps\B2b\Model\Payment\StoreCreditFacade::CODE</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="TonyappsB2bStoreCreditValueHandler" type="Magento\Payment\Gateway\Config\ConfigValueHandler">
+        <arguments>
+            <argument name="configInterface" xsi:type="object">TonyappsB2bStoreCreditConfig</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="TonyappsB2bStoreCreditValueHandlerPool" type="Magento\Payment\Gateway\Config\ValueHandlerPool">
+        <arguments>
+            <argument name="handlers" xsi:type="array">
+                <item name="default" xsi:type="string">TonyappsB2bStoreCreditValueHandler</item>
+            </argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="TonyappsB2bStoreCreditFacade" type="Magento\Payment\Model\Method\Adapter">
+        <arguments>
+            <argument name="code" xsi:type="const">Tonyapps\B2b\Model\Payment\StoreCreditFacade::CODE</argument>
+            <argument name="formBlockType" xsi:type="string">Magento\Payment\Block\Form</argument>
+            <argument name="infoBlockType" xsi:type="string">Magento\Payment\Block\Info</argument>
+            <argument name="valueHandlerPool" xsi:type="object">TonyappsB2bStoreCreditValueHandlerPool</argument>
+        </arguments>
+    </virtualType>
+
+    <!-- Carry company_id into the order grid table so the admin order grid can show and filter it. -->
+    <virtualType name="Magento\Sales\Model\ResourceModel\Order\Grid" type="Magento\Sales\Model\ResourceModel\Grid">
+        <arguments>
+            <argument name="columns" xsi:type="array">
+                <item name="company_id" xsi:type="string">sales_order.company_id</item>
+            </argument>
+        </arguments>
+    </virtualType>
+
+    <type name="Magento\Framework\View\Element\UiComponent\DataProvider\CollectionFactory">
+        <arguments>
+            <argument name="collections" xsi:type="array">
+                <item name="tonyapps_b2b_company_listing_data_source" xsi:type="string">Tonyapps\B2b\Model\ResourceModel\Company\Grid\Collection</item>
+                <item name="tonyapps_b2b_role_listing_data_source" xsi:type="string">Tonyapps\B2b\Model\ResourceModel\Role\Grid\Collection</item>
+            </argument>
+        </arguments>
+    </type>
+</config>

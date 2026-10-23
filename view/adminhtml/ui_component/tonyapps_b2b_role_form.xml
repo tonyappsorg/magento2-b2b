@@ -1,0 +1,105 @@
+<?xml version="1.0"?>
+<form xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd">
+    <argument name="data" xsi:type="array">
+        <item name="js_config" xsi:type="array">
+            <item name="provider" xsi:type="string">tonyapps_b2b_role_form.role_form_data_source</item>
+        </item>
+        <item name="label" xsi:type="string" translate="true">Role Information</item>
+    </argument>
+    <settings>
+        <buttons>
+            <button name="back" class="Tonyapps\B2b\Block\Adminhtml\Role\Edit\BackButton"/>
+            <button name="save" class="Tonyapps\B2b\Block\Adminhtml\Role\Edit\SaveButton"/>
+        </buttons>
+        <namespace>tonyapps_b2b_role_form</namespace>
+        <dataScope>data</dataScope>
+        <deps>
+            <dep>tonyapps_b2b_role_form.role_form_data_source</dep>
+        </deps>
+    </settings>
+
+    <dataSource name="role_form_data_source">
+        <argument name="data" xsi:type="array">
+            <item name="js_config" xsi:type="array">
+                <item name="component" xsi:type="string">Magento_Ui/js/form/provider</item>
+            </item>
+        </argument>
+        <settings>
+            <submitUrl path="tonyapps_b2b/role/save"/>
+        </settings>
+        <dataProvider name="role_form_data_source" class="Tonyapps\B2b\Model\Role\DataProvider">
+            <settings>
+                <requestFieldName>role_id</requestFieldName>
+                <primaryFieldName>role_id</primaryFieldName>
+            </settings>
+        </dataProvider>
+    </dataSource>
+
+    <fieldset name="general" sortOrder="10">
+        <settings>
+            <label translate="true">Role</label>
+        </settings>
+
+        <field name="role_id" formElement="hidden">
+            <settings>
+                <dataType>number</dataType>
+            </settings>
+        </field>
+        <field name="company_id" formElement="hidden">
+            <settings>
+                <dataType>number</dataType>
+            </settings>
+        </field>
+
+        <field name="role_name" formElement="input" sortOrder="10">
+            <settings>
+                <dataType>text</dataType>
+                <label translate="true">Role Name</label>
+                <validation>
+                    <rule name="required-entry" xsi:type="boolean">true</rule>
+                </validation>
+            </settings>
+        </field>
+
+        <field name="is_default" formElement="checkbox" sortOrder="20">
+            <settings>
+                <dataType>boolean</dataType>
+                <label translate="true">Default Role</label>
+                <notice translate="true">Given to company members who have no role of their own. A company has at most one.</notice>
+            </settings>
+            <formElements>
+                <checkbox>
+                    <settings>
+                        <valueMap>
+                            <map name="false" xsi:type="number">0</map>
+                            <map name="true" xsi:type="number">1</map>
+                        </valueMap>
+                    </settings>
+                </checkbox>
+            </formElements>
+        </field>
+    </fieldset>
+
+    <fieldset name="permissions_fieldset" sortOrder="20">
+        <settings>
+            <label translate="true">Permissions</label>
+        </settings>
+
+        <field name="permissions" formElement="multiselect" sortOrder="10">
+            <settings>
+                <dataType>text</dataType>
+                <label translate="true">This role may</label>
+                <notice translate="true">Anything not selected is denied. Seeing the company page is always allowed, and a permission that depends on another adds it automatically.</notice>
+            </settings>
+            <formElements>
+                <multiselect>
+                    <settings>
+                        <options class="Tonyapps\B2b\Model\Source\PermissionOptions"/>
+                        <size>8</size>
+                    </settings>
+                </multiselect>
+            </formElements>
+        </field>
+    </fieldset>
+</form>

@@ -1,0 +1,154 @@
+<?php
+/**
+ * Company users list and add-user form.
+ *
+ * @var \Tonyapps\B2b\Block\Company\Users $block
+ * @var \Magento\Framework\Escaper $escaper
+ */
+$users = $block->getUsers();
+$canManage = $block->canManage();
+$roles = $block->getRoles();
+?>
+<div class="block block-company-users">
+    <div class="block-content">
+        <?php if ($users): ?>
+            <div class="table-wrapper">
+                <table class="data table table-company-users">
+                    <caption class="table-caption"><?= $escaper->escapeHtml(__('Company Users')) ?></caption>
+                    <thead>
+                        <tr>
+                            <th scope="col" class="col name"><?= $escaper->escapeHtml(__('Name')) ?></th>
+                            <th scope="col" class="col email"><?= $escaper->escapeHtml(__('Email')) ?></th>
+                            <th scope="col" class="col role"><?= $escaper->escapeHtml(__('Role')) ?></th>
+                            <?php if ($canManage): ?>
+                                <th scope="col" class="col actions">&nbsp;</th>
+                            <?php endif; ?>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <?php foreach ($users as $user): ?>
+                        <tr>
+                            <td data-th="<?= $escaper->escapeHtmlAttr(__('Name')) ?>" class="col name">
+                                <?= $escaper->escapeHtml($user->getFirstname() . ' ' . $user->getLastname()) ?>
+                                <?php if ($block->isAdministrator($user)): ?>
+                                    <span class="company-admin-badge">
+                                        (<?= $escaper->escapeHtml(__('Administrator')) ?>)
+                                    </span>
+                                <?php endif; ?>
+                            </td>
+                            <td data-th="<?= $escaper->escapeHtmlAttr(__('Email')) ?>" class="col email">
+                                <?= $escaper->escapeHtml($user->getEmail()) ?>
+                            </td>
+                            <td data-th="<?= $escaper->escapeHtmlAttr(__('Role')) ?>" class="col role">
+                                <?php if ($block->isAdministrator($user)): ?>
+                                    <?= $escaper->escapeHtml(__('Full access')) ?>
+                                <?php elseif ($canManage && $roles): ?>
+                                    <form action="<?= $escaper->escapeUrl($block->getSetRoleUrl($user)) ?>"
+                                          method="post" class="form-user-role">
+                                        <?= $block->getBlockHtml('formkey') ?>
+                                        <select name="role_id" class="select" onchange="this.form.submit();">
+                                            <option value=""><?= $escaper->escapeHtml(__('Company default')) ?></option>
+                                            <?php $current = $block->getRoleId($user); ?>
+                                            <?php foreach ($roles as $role): ?>
+                                                <option value="<?= (int)$role->getId() ?>"
+                                                    <?= (int)$role->getId() === $current ? 'selected="selected"' : '' ?>>
+                                                    <?= $escaper->escapeHtml($role->getRoleName()) ?>
+                                                </option>
+                                            <?php endforeach; ?>
+                                        </select>
+                                        <noscript>
+                                            <button type="submit" class="action"><span><?= $escaper->escapeHtml(__('Set')) ?></span></button>
+                                        </noscript>
+                                    </form>
+                                <?php else: ?>
+                                    <?php $current = $block->getRoleId($user); ?>
+                                    <?= $escaper->escapeHtml($current === null ? __('Company default') : __('Assigned')) ?>
+                                <?php endif; ?>
+                            </td>
+                            <?php if ($canManage): ?>
+                                <td class="col actions">
+                                    <?php if (!$block->isAdministrator($user)): ?>
+                                        <form action="<?= $escaper->escapeUrl($block->getRemoveUrl($user)) ?>" method="post">
+                                            <?= $block->getBlockHtml('formkey') ?>
+                                            <button type="submit" class="action delete">
+                                                <span><?= $escaper->escapeHtml(__('Remove')) ?></span>
+                                            </button>
+                                        </form>
+                                    <?php endif; ?>
+                                </td>
+                            <?php endif; ?>
+                        </tr>
+                    <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+        <?php else: ?>
+            <div class="message info empty"><span><?= $escaper->escapeHtml(__('Your company has no users yet.')) ?></span></div>
+        <?php endif; ?>
+    </div>
+
+    <?php if ($canManage): ?>
+    <form class="form form-company-user" action="<?= $escaper->escapeUrl($block->getAddUrl()) ?>"
+          method="post" data-mage-init='{"validation":{}}'>
+        <?= $block->getBlockHtml('formkey') ?>
+        <fieldset class="fieldset">
+            <legend class="legend"><span><?= $escaper->escapeHtml(__('Add a User')) ?></span></legend><br>
+
+            <div class="field required">
+                <label class="label" for="user_firstname"><span><?= $escaper->escapeHtml(__('First Name')) ?></span></label>
+                <div class="control">
+                    <input type="text" name="user[firstname]" id="user_firstname" class="input-text"
+                           data-validate="{required:true}">
+                </div>
+            </div>
+            <div class="field required">
+                <label class="label" for="user_lastname"><span><?= $escaper->escapeHtml(__('Last Name')) ?></span></label>
+                <div class="control">
+                    <input type="text" name="user[lastname]" id="user_lastname" class="input-text"
+                           data-validate="{required:true}">
+                </div>
+            </div>
+            <div class="field required">
+                <label class="label" for="user_email"><span><?= $escaper->escapeHtml(__('Email')) ?></span></label>
+                <div class="control">
+                    <input type="email" name="user[email]" id="user_email" class="input-text"
+                           data-validate="{required:true, 'validate-email':true}">
+                </div>
+            </div>
+
+            <?php if ($roles): ?>
+                <div class="field">
+                    <label class="label" for="user_role_id"><span><?= $escaper->escapeHtml(__('Role')) ?></span></label>
+                    <div class="control">
+                        <select name="user[role_id]" id="user_role_id" class="select">
+                            <option value=""><?= $escaper->escapeHtml(__('Company default')) ?></option>
+                            <?php foreach ($roles as $role): ?>
+                                <option value="<?= (int)$role->getId() ?>">
+                                    <?= $escaper->escapeHtml($role->getRoleName()) ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                </div>
+            <?php endif; ?>
+
+            <p class="note"><?= $escaper->escapeHtml(
+                __('The new user is emailed a link to set their own password.')
+            ) ?></p>
+        </fieldset>
+
+        <div class="actions-toolbar">
+            <div class="primary">
+                <button type="submit" class="action save primary">
+                    <span><?= $escaper->escapeHtml(__('Add User')) ?></span>
+                </button>
+            </div>
+            <div class="secondary">
+                <a class="action back" href="<?= $escaper->escapeUrl($block->getBackUrl()) ?>">
+                    <span><?= $escaper->escapeHtml(__('Back')) ?></span>
+                </a>
+            </div>
+        </div>
+    </form>
+    <?php endif; ?>
+</div>

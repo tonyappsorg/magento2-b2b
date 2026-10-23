@@ -1,0 +1,188 @@
+<?xml version="1.0"?>
+<listing xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd">
+    <argument name="data" xsi:type="array">
+        <item name="js_config" xsi:type="array">
+            <item name="provider" xsi:type="string">tonyapps_b2b_company_listing.tonyapps_b2b_company_listing_data_source</item>
+        </item>
+    </argument>
+    <settings>
+        <spinner>tonyapps_b2b_company_columns</spinner>
+        <deps>
+            <dep>tonyapps_b2b_company_listing.tonyapps_b2b_company_listing_data_source</dep>
+        </deps>
+        <buttons>
+            <button name="add">
+                <url path="*/*/new"/>
+                <class>primary</class>
+                <label translate="true">Add Company</label>
+            </button>
+        </buttons>
+    </settings>
+
+    <dataSource name="tonyapps_b2b_company_listing_data_source" component="Magento_Ui/js/grid/provider">
+        <settings>
+            <storageConfig>
+                <param name="indexField" xsi:type="string">entity_id</param>
+            </storageConfig>
+            <updateUrl path="mui/index/render"/>
+        </settings>
+        <aclResource>Tonyapps_B2b::companies</aclResource>
+        <dataProvider name="tonyapps_b2b_company_listing_data_source"
+                      class="Magento\Framework\View\Element\UiComponent\DataProvider\DataProvider">
+            <settings>
+                <requestFieldName>entity_id</requestFieldName>
+                <primaryFieldName>entity_id</primaryFieldName>
+            </settings>
+        </dataProvider>
+    </dataSource>
+
+    <listingToolbar name="listing_top">
+        <settings>
+            <sticky>true</sticky>
+        </settings>
+        <bookmark name="bookmarks"/>
+        <columnsControls name="columns_controls"/>
+        <filters name="listing_filters"/>
+        <massaction name="listing_massaction">
+            <action name="approve">
+                <settings>
+                    <confirm>
+                        <title translate="true">Approve companies</title>
+                        <message translate="true">Approving a company applies its customer group to every one of its users. Continue?</message>
+                    </confirm>
+                    <url path="tonyapps_b2b/company/massStatus">
+                        <param name="status">1</param>
+                    </url>
+                    <type>approve</type>
+                    <label translate="true">Approve</label>
+                </settings>
+            </action>
+            <action name="reject">
+                <settings>
+                    <confirm>
+                        <title translate="true">Reject companies</title>
+                        <message translate="true">The company administrator is emailed when a pending company is rejected. Continue?</message>
+                    </confirm>
+                    <url path="tonyapps_b2b/company/massStatus">
+                        <param name="status">2</param>
+                    </url>
+                    <type>reject</type>
+                    <label translate="true">Reject</label>
+                </settings>
+            </action>
+            <action name="block">
+                <settings>
+                    <confirm>
+                        <title translate="true">Block companies</title>
+                        <message translate="true">Blocking a company takes company pricing away from its users. Continue?</message>
+                    </confirm>
+                    <url path="tonyapps_b2b/company/massStatus">
+                        <param name="status">3</param>
+                    </url>
+                    <type>block</type>
+                    <label translate="true">Block</label>
+                </settings>
+            </action>
+            <action name="delete">
+                <settings>
+                    <confirm>
+                        <title translate="true">Delete companies</title>
+                        <message translate="true">Are you sure you want to delete the selected companies? Their users stay, but lose their company pricing.</message>
+                    </confirm>
+                    <url path="tonyapps_b2b/company/massDelete"/>
+                    <type>delete</type>
+                    <label translate="true">Delete</label>
+                </settings>
+            </action>
+        </massaction>
+        <paging name="listing_paging"/>
+    </listingToolbar>
+
+    <columns name="tonyapps_b2b_company_columns">
+        <settings>
+            <childDefaults>
+                <param name="fieldAction" xsi:type="array">
+                    <item name="provider" xsi:type="string">tonyapps_b2b_company_listing.tonyapps_b2b_company_listing.tonyapps_b2b_company_columns.actions</item>
+                    <item name="target" xsi:type="string">applyAction</item>
+                    <item name="params" xsi:type="array">
+                        <item name="0" xsi:type="string">edit</item>
+                        <item name="1" xsi:type="string">${ $.$data.entity_id }</item>
+                    </item>
+                </param>
+            </childDefaults>
+        </settings>
+
+        <selectionsColumn name="ids" sortOrder="0">
+            <settings>
+                <indexField>entity_id</indexField>
+                <resizeEnabled>false</resizeEnabled>
+            </settings>
+        </selectionsColumn>
+
+        <column name="entity_id" sortOrder="10">
+            <settings>
+                <filter>textRange</filter>
+                <label translate="true">ID</label>
+                <sorting>asc</sorting>
+            </settings>
+        </column>
+        <column name="name" sortOrder="20">
+            <settings>
+                <filter>text</filter>
+                <label translate="true">Company Name</label>
+            </settings>
+        </column>
+        <column name="email" sortOrder="30">
+            <settings>
+                <filter>text</filter>
+                <label translate="true">Company Email</label>
+            </settings>
+        </column>
+        <column name="status" component="Magento_Ui/js/grid/columns/select" sortOrder="40">
+            <settings>
+                <options class="Tonyapps\B2b\Model\Source\Status"/>
+                <filter>select</filter>
+                <dataType>select</dataType>
+                <label translate="true">Status</label>
+            </settings>
+        </column>
+        <column name="customer_group_id" component="Magento_Ui/js/grid/columns/select" sortOrder="50">
+            <settings>
+                <options class="Magento\Customer\Model\Customer\Attribute\Source\Group"/>
+                <filter>select</filter>
+                <dataType>select</dataType>
+                <label translate="true">Customer Group</label>
+            </settings>
+        </column>
+        <column name="path" sortOrder="60">
+            <settings>
+                <filter>text</filter>
+                <label translate="true">Hierarchy Path</label>
+                <visible>false</visible>
+            </settings>
+        </column>
+        <column name="level" sortOrder="70">
+            <settings>
+                <filter>textRange</filter>
+                <label translate="true">Level</label>
+                <visible>false</visible>
+            </settings>
+        </column>
+        <column name="created_at" class="Magento\Ui\Component\Listing\Columns\Date"
+                component="Magento_Ui/js/grid/columns/date" sortOrder="80">
+            <settings>
+                <filter>dateRange</filter>
+                <dataType>date</dataType>
+                <label translate="true">Created</label>
+            </settings>
+        </column>
+
+        <actionsColumn name="actions" class="Tonyapps\B2b\Ui\Component\Listing\Column\CompanyActions" sortOrder="90">
+            <settings>
+                <indexField>entity_id</indexField>
+                <resizeEnabled>false</resizeEnabled>
+            </settings>
+        </actionsColumn>
+    </columns>
+</listing>

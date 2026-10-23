@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<!--
+    "My Company" in the account navigation.
+
+    The container block is customer_account_navigation (underscores). The hyphenated
+    customer-account-navigation-* names belong to its child links, not to the block itself.
+-->
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <body>
+        <referenceBlock name="customer_account_navigation">
+            <block class="Tonyapps\B2b\Block\Company\Link" name="customer-account-navigation-tonyapps-b2b-link">
+                <arguments>
+                    <argument name="path" xsi:type="string">b2b/company/index</argument>
+                    <argument name="label" xsi:type="string" translate="true">My Company</argument>
+                    <argument name="sortOrder" xsi:type="number">240</argument>
+                </arguments>
+            </block>
+        </referenceBlock>
+    </body>
+</page>

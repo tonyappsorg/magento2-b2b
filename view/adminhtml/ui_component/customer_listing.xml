@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<listing xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd">
+    <massaction name="listing_massaction">
+        <action name="tonyapps_b2b_assign_company">
+            <settings>
+                <type>tonyapps_b2b_assign_company</type>
+                <label translate="true">Assign to Company</label>
+                <actions class="Tonyapps\B2b\Ui\Component\MassAction\CompanyOptions"/>
+            </settings>
+        </action>
+    </massaction>
+</listing>

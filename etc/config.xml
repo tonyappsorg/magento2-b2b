@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Store:etc/config.xsd">
+    <default>
+        <tonyapps_b2b>
+            <general>
+                <enabled>1</enabled>
+            </general>
+            <registration>
+                <frontend_enabled>1</frontend_enabled>
+                <in_customer_registration>1</in_customer_registration>
+            </registration>
+            <email>
+                <new_company_template>tonyapps_b2b_email_new_company_template</new_company_template>
+                <approved_template>tonyapps_b2b_email_approved_template</approved_template>
+                <rejected_template>tonyapps_b2b_email_rejected_template</rejected_template>
+            </email>
+        </tonyapps_b2b>
+        <payment>
+            <!-- Shaped like a core offline method: no payment_action, so placing an order runs
+                 no gateway command. The money moves in an observer on order placement instead. -->
+            <tonyapps_b2b_credit>
+                <active>1</active>
+                <model>TonyappsB2bStoreCreditFacade</model>
+                <order_status>pending</order_status>
+                <title>Store Credit</title>
+                <allowspecific>0</allowspecific>
+                <group>offline</group>
+                <sort_order>5</sort_order>
+            </tonyapps_b2b_credit>
+        </payment>
+    </default>
+</config>

@@ -1,0 +1,125 @@
+{
+    "tonyapps_b2b_company": {
+        "column": {
+            "entity_id": true,
+            "parent_id": true,
+            "path": true,
+            "level": true,
+            "name": true,
+            "legal_name": true,
+            "vat_tax_id": true,
+            "email": true,
+            "telephone": true,
+            "street": true,
+            "city": true,
+            "region_id": true,
+            "region": true,
+            "postcode": true,
+            "country_id": true,
+            "status": true,
+            "customer_group_id": true,
+            "admin_customer_id": true,
+            "comment": true,
+            "created_at": true,
+            "updated_at": true,
+            "payment_mode": true,
+            "credit_balance": true
+        },
+        "constraint": {
+            "PRIMARY": true,
+            "TONYAPPS_B2B_COMPANY_PARENT_ID_TONYAPPS_B2B_COMPANY_ENTITY_ID": true,
+            "TONYAPPS_B2B_COMPANY_ADMIN_CUSTOMER_ID_CUSTOMER_ENTITY_ENTITY_ID": true
+        },
+        "index": {
+            "TONYAPPS_B2B_COMPANY_PATH": true,
+            "TONYAPPS_B2B_COMPANY_STATUS": true,
+            "TONYAPPS_B2B_COMPANY_NAME": true
+        }
+    },
+    "tonyapps_b2b_company_customer": {
+        "column": {
+            "customer_id": true,
+            "company_id": true,
+            "created_at": true,
+            "role_id": true
+        },
+        "constraint": {
+            "PRIMARY": true,
+            "TONYAPPS_B2B_COMPANY_CUSTOMER_CUSTOMER_ID_CUSTOMER_ENTITY_ENTITY_ID": true,
+            "TONYAPPS_B2B_COMPANY_CUSTOMER_COMPANY_ID_TONYAPPS_B2B_COMPANY_ENT_ID": true,
+            "TONYAPPS_B2B_COMPANY_CSTR_CSTR_ID_CSTR_ENTT_ENTT_ID": true,
+            "FK_44533B07D6A736286AB1AB34EF462137": true,
+            "TONYAPPS_B2B_COMPANY_CUSTOMER_ROLE_ID_TONYAPPS_B2B_ROLE_ROLE_ID": true
+        },
+        "index": {
+            "TONYAPPS_B2B_COMPANY_CUSTOMER_COMPANY_ID": true
+        }
+    },
+    "tonyapps_b2b_role": {
+        "column": {
+            "role_id": true,
+            "company_id": true,
+            "role_name": true,
+            "is_default": true,
+            "permissions": true,
+            "created_at": true,
+            "updated_at": true
+        },
+        "constraint": {
+            "PRIMARY": true,
+            "TONYAPPS_B2B_ROLE_COMPANY_ID_TONYAPPS_B2B_COMPANY_ENTITY_ID": true
+        },
+        "index": {
+            "TONYAPPS_B2B_ROLE_COMPANY_ID": true
+        }
+    },
+    "sales_order": {
+        "column": {
+            "company_id": true
+        },
+        "index": {
+            "TONYAPPS_B2B_SALES_ORDER_COMPANY_ID": true
+        }
+    },
+    "sales_order_grid": {
+        "column": {
+            "company_id": true
+        },
+        "index": {
+            "TONYAPPS_B2B_SALES_ORDER_GRID_COMPANY_ID": true
+        }
+    },
+    "tonyapps_b2b_company_payment": {
+        "column": {
+            "company_id": true,
+            "method_code": true
+        },
+        "constraint": {
+            "PRIMARY": true,
+            "TONYAPPS_B2B_COMPANY_PAYMENT_COMPANY_ID_TONYAPPS_B2B_COMPANY_ENT_ID": true
+        }
+    },
+    "tonyapps_b2b_credit_history": {
+        "column": {
+            "entity_id": true,
+            "company_id": true,
+            "delta": true,
+            "balance_after": true,
+            "type": true,
+            "order_id": true,
+            "order_increment_id": true,
+            "comment": true,
+            "admin_user_id": true,
+            "customer_id": true,
+            "created_at": true
+        },
+        "constraint": {
+            "PRIMARY": true,
+            "TONYAPPS_B2B_CREDIT_HISTORY_COMPANY_ID_TONYAPPS_B2B_COMPANY_ENT_ID": true
+        },
+        "index": {
+            "TONYAPPS_B2B_CREDIT_HISTORY_COMPANY_ID_CREATED_AT": true,
+            "TONYAPPS_B2B_CREDIT_HISTORY_ORDER_ID": true
+        }
+    }
+}

@@ -1,0 +1,50 @@
+<?php
+/**
+ * Optional company section on the Create an Account form.
+ *
+ * Ticking the box reveals the company name field; leaving it alone registers an ordinary customer.
+ *
+ * @var \Tonyapps\B2b\Block\Company\RegisterFieldset $block
+ * @var \Magento\Framework\Escaper $escaper
+ */
+?>
+<fieldset class="fieldset create company" data-hasrequired="<?= $escaper->escapeHtmlAttr(__('* Required Fields')) ?>">
+    <legend class="legend"><span><?= $escaper->escapeHtml(__('Company')) ?></span></legend><br>
+
+    <div class="field choice">
+        <input type="checkbox" name="company[register]" id="company_register" value="1" class="checkbox">
+        <label class="label" for="company_register">
+            <span><?= $escaper->escapeHtml(__('I am registering on behalf of a company')) ?></span>
+        </label>
+    </div>
+
+    <div class="field company-name" id="company_name_field" style="display:none;">
+        <label class="label" for="company_name"><span><?= $escaper->escapeHtml(__('Company Name')) ?></span></label>
+        <div class="control">
+            <input type="text" name="company[name]" id="company_name" class="input-text">
+        </div>
+    </div>
+
+    <p class="note"><?= $escaper->escapeHtml(
+        __('Your company is reviewed before it becomes active. We will email you once a decision is made.')
+    ) ?></p>
+</fieldset>
+
+<script type="text/javascript">
+    require(['jquery'], function ($) {
+        'use strict';
+
+        var toggle = $('#company_register'),
+            field = $('#company_name_field'),
+            input = $('#company_name');
+
+        function apply() {
+            field.toggle(toggle.prop('checked'));
+            // Only validate the name when the customer says they are registering a company.
+            input.prop('required', toggle.prop('checked'));
+        }
+
+        toggle.on('change', apply);
+        apply();
+    });
+</script>

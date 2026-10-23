@@ -1,0 +1,121 @@
+<?php
+/**
+ * Company registration / profile form.
+ *
+ * @var \Tonyapps\B2b\Block\Company\Form $block
+ * @var \Magento\Framework\Escaper $escaper
+ */
+$fields = [
+    'legal_name' => __('Legal Name'),
+    'vat_tax_id' => __('VAT / Tax ID'),
+    'email'      => __('Company Email'),
+    'telephone'  => __('Telephone'),
+];
+?>
+<form class="form form-company"
+      action="<?= $escaper->escapeUrl($block->getFormAction()) ?>"
+      method="post"
+      id="form-company"
+      data-mage-init='{"validation":{}}'>
+    <?= $block->getBlockHtml('formkey') ?>
+
+    <fieldset class="fieldset info">
+        <legend class="legend"><span><?= $escaper->escapeHtml(__('Company Details')) ?></span></legend><br>
+
+        <div class="field required">
+            <label class="label" for="company_name"><span><?= $escaper->escapeHtml(__('Company Name')) ?></span></label>
+            <div class="control">
+                <input type="text" name="company[name]" id="company_name" class="input-text"
+                       value="<?= $escaper->escapeHtmlAttr($block->getFieldValue('name')) ?>"
+                       data-validate="{required:true}">
+            </div>
+        </div>
+
+        <?php foreach ($fields as $code => $label): ?>
+            <div class="field">
+                <label class="label" for="company_<?= $escaper->escapeHtmlAttr($code) ?>">
+                    <span><?= $escaper->escapeHtml($label) ?></span>
+                </label>
+                <div class="control">
+                    <input type="<?= $code === 'email' ? 'email' : 'text' ?>"
+                           name="company[<?= $escaper->escapeHtmlAttr($code) ?>]"
+                           id="company_<?= $escaper->escapeHtmlAttr($code) ?>"
+                           class="input-text"
+                           <?= $code === 'email' ? 'data-validate="{\'validate-email\':true}"' : '' ?>
+                           value="<?= $escaper->escapeHtmlAttr($block->getFieldValue($code)) ?>">
+                </div>
+            </div>
+        <?php endforeach; ?>
+    </fieldset>
+
+    <fieldset class="fieldset address">
+        <legend class="legend"><span><?= $escaper->escapeHtml(__('Legal Address')) ?></span></legend><br>
+
+        <div class="field">
+            <label class="label" for="company_street"><span><?= $escaper->escapeHtml(__('Street Address')) ?></span></label>
+            <div class="control">
+                <textarea name="company[street]" id="company_street" class="input-text" rows="2"
+                ><?= $escaper->escapeHtml($block->getFieldValue('street')) ?></textarea>
+            </div>
+        </div>
+
+        <div class="field">
+            <label class="label" for="company_city"><span><?= $escaper->escapeHtml(__('City')) ?></span></label>
+            <div class="control">
+                <input type="text" name="company[city]" id="company_city" class="input-text"
+                       value="<?= $escaper->escapeHtmlAttr($block->getFieldValue('city')) ?>">
+            </div>
+        </div>
+
+        <div class="field">
+            <label class="label" for="company_region"><span><?= $escaper->escapeHtml(__('State / Province')) ?></span></label>
+            <div class="control">
+                <input type="text" name="company[region]" id="company_region" class="input-text"
+                       value="<?= $escaper->escapeHtmlAttr($block->getFieldValue('region')) ?>">
+            </div>
+        </div>
+
+        <div class="field">
+            <label class="label" for="company_postcode"><span><?= $escaper->escapeHtml(__('Zip / Postal Code')) ?></span></label>
+            <div class="control">
+                <input type="text" name="company[postcode]" id="company_postcode" class="input-text"
+                       value="<?= $escaper->escapeHtmlAttr($block->getFieldValue('postcode')) ?>">
+            </div>
+        </div>
+
+        <div class="field">
+            <label class="label" for="company_country_id"><span><?= $escaper->escapeHtml(__('Country')) ?></span></label>
+            <div class="control">
+                <select name="company[country_id]" id="company_country_id" class="select">
+                    <option value=""><?= $escaper->escapeHtml(__('Please select')) ?></option>
+                    <?php $selected = $block->getFieldValue('country_id'); ?>
+                    <?php foreach ($block->getCountryOptions() as $option): ?>
+                        <option value="<?= $escaper->escapeHtmlAttr($option['value']) ?>"
+                            <?= $option['value'] === $selected ? 'selected="selected"' : '' ?>>
+                            <?= $escaper->escapeHtml($option['label']) ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+        </div>
+    </fieldset>
+
+    <?php if ($block->isRegistration()): ?>
+        <p class="message notice"><span><?= $escaper->escapeHtml(
+            __('Your company is reviewed before it becomes active. We will email you once a decision is made.')
+        ) ?></span></p>
+    <?php endif; ?>
+
+    <div class="actions-toolbar">
+        <div class="primary">
+            <button type="submit" class="action save primary">
+                <span><?= $escaper->escapeHtml($block->isRegistration() ? __('Register Company') : __('Save')) ?></span>
+            </button>
+        </div>
+        <div class="secondary">
+            <a class="action back" href="<?= $escaper->escapeUrl($block->getBackUrl()) ?>">
+                <span><?= $escaper->escapeHtml(__('Back')) ?></span>
+            </a>
+        </div>
+    </div>
+</form>

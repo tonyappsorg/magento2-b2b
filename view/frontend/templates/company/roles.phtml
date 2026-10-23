@@ -1,0 +1,166 @@
+<?php
+/**
+ * Company roles: the list, and one form that both adds and edits.
+ *
+ * @var \Tonyapps\B2b\Block\Company\Roles $block
+ * @var \Magento\Framework\Escaper $escaper
+ */
+$roles = $block->getRoles();
+$canManage = $block->canManage();
+?>
+<div class="block block-company-roles">
+    <div class="block-content">
+        <?php if ($roles): ?>
+            <div class="table-wrapper">
+                <table class="data table table-company-roles">
+                    <caption class="table-caption"><?= $escaper->escapeHtml(__('Company Roles')) ?></caption>
+                    <thead>
+                        <tr>
+                            <th scope="col" class="col name"><?= $escaper->escapeHtml(__('Role')) ?></th>
+                            <th scope="col" class="col permissions"><?= $escaper->escapeHtml(__('Permissions')) ?></th>
+                            <th scope="col" class="col users"><?= $escaper->escapeHtml(__('Users')) ?></th>
+                            <?php if ($canManage): ?>
+                                <th scope="col" class="col actions">&nbsp;</th>
+                            <?php endif; ?>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <?php foreach ($roles as $role): ?>
+                        <tr>
+                            <td data-th="<?= $escaper->escapeHtmlAttr(__('Role')) ?>" class="col name">
+                                <?= $escaper->escapeHtml($role->getRoleName()) ?>
+                                <?php if ($role->isDefault()): ?>
+                                    <span class="role-default-badge">
+                                        (<?= $escaper->escapeHtml(__('default')) ?>)
+                                    </span>
+                                <?php endif; ?>
+                            </td>
+                            <td data-th="<?= $escaper->escapeHtmlAttr(__('Permissions')) ?>" class="col permissions">
+                                <?= $escaper->escapeHtml($block->getPermissionLabels($role)) ?>
+                            </td>
+                            <td data-th="<?= $escaper->escapeHtmlAttr(__('Users')) ?>" class="col users">
+                                <?= (int)$block->getMemberCount($role) ?>
+                            </td>
+                            <?php if ($canManage): ?>
+                                <td class="col actions">
+                                    <button type="button" class="action edit"
+                                            data-role-edit="<?= (int)$role->getId() ?>">
+                                        <span><?= $escaper->escapeHtml(__('Edit')) ?></span>
+                                    </button>
+                                    <form action="<?= $escaper->escapeUrl($block->getDeleteUrl($role)) ?>"
+                                          method="post" style="display:inline;">
+                                        <?= $block->getBlockHtml('formkey') ?>
+                                        <button type="submit" class="action delete">
+                                            <span><?= $escaper->escapeHtml(__('Delete')) ?></span>
+                                        </button>
+                                    </form>
+                                </td>
+                            <?php endif; ?>
+                        </tr>
+                    <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+        <?php else: ?>
+            <div class="message info empty"><span><?= $escaper->escapeHtml(
+                __('Your company has no roles yet. Until one is marked as the default, members can only see the company page.')
+            ) ?></span></div>
+        <?php endif; ?>
+    </div>
+
+    <?php if ($canManage): ?>
+        <form class="form form-company-role" id="company-role-form"
+              action="<?= $escaper->escapeUrl($block->getSaveUrl()) ?>" method="post"
+              data-mage-init='{"validation":{}}'>
+            <?= $block->getBlockHtml('formkey') ?>
+            <input type="hidden" name="role[role_id]" id="role_id" value="">
+
+            <fieldset class="fieldset">
+                <legend class="legend">
+                    <span id="role-form-title"><?= $escaper->escapeHtml(__('Add a Role')) ?></span>
+                </legend><br>
+
+                <div class="field required">
+                    <label class="label" for="role_name"><span><?= $escaper->escapeHtml(__('Role Name')) ?></span></label>
+                    <div class="control">
+                        <input type="text" name="role[role_name]" id="role_name" class="input-text"
+                               data-validate="{required:true}">
+                    </div>
+                </div>
+
+                <div class="field choice">
+                    <input type="checkbox" name="role[is_default]" id="role_is_default" value="1" class="checkbox">
+                    <label class="label" for="role_is_default">
+                        <span><?= $escaper->escapeHtml(__('Give this role to members who have none of their own')) ?></span>
+                    </label>
+                </div>
+
+                <?php foreach ($block->getGroupedPermissions() as $groupLabel => $groupPermissions): ?>
+                    <div class="field permissions-group">
+                        <span class="label"><span><?= $escaper->escapeHtml($groupLabel) ?></span></span>
+                        <div class="control">
+                            <?php foreach ($groupPermissions as $permission => $label): ?>
+                                <div class="field choice">
+                                    <input type="checkbox" name="role[permissions][]" class="checkbox permission"
+                                           id="perm_<?= $escaper->escapeHtmlAttr($permission) ?>"
+                                           value="<?= $escaper->escapeHtmlAttr($permission) ?>">
+                                    <label class="label" for="perm_<?= $escaper->escapeHtmlAttr($permission) ?>">
+                                        <span><?= $escaper->escapeHtml($label) ?></span>
+                                    </label>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            </fieldset>
+
+            <div class="actions-toolbar">
+                <div class="primary">
+                    <button type="submit" class="action save primary">
+                        <span><?= $escaper->escapeHtml(__('Save Role')) ?></span>
+                    </button>
+                </div>
+                <div class="secondary">
+                    <button type="button" class="action clear" id="role-form-reset" style="display:none;">
+                        <span><?= $escaper->escapeHtml(__('Cancel')) ?></span>
+                    </button>
+                    <a class="action back" href="<?= $escaper->escapeUrl($block->getBackUrl()) ?>">
+                        <span><?= $escaper->escapeHtml(__('Back')) ?></span>
+                    </a>
+                </div>
+            </div>
+        </form>
+
+        <script type="text/javascript">
+            require(['jquery'], function ($) {
+                'use strict';
+
+                var roles = <?= /* @noEscape */ $block->getRolesJson() ?>,
+                    form = $('#company-role-form'),
+                    title = $('#role-form-title'),
+                    cancel = $('#role-form-reset');
+
+                function fill(role) {
+                    $('#role_id').val(role ? role.role_id : '');
+                    $('#role_name').val(role ? role.role_name : '');
+                    $('#role_is_default').prop('checked', !!(role && role.is_default));
+                    form.find('input.permission').each(function () {
+                        $(this).prop('checked', !!role && role.permissions.indexOf(this.value) !== -1);
+                    });
+                    title.text(role ? '<?= $escaper->escapeJs(__('Edit Role')) ?>'
+                                    : '<?= $escaper->escapeJs(__('Add a Role')) ?>');
+                    cancel.toggle(!!role);
+                }
+
+                $('[data-role-edit]').on('click', function () {
+                    fill(roles[$(this).data('role-edit')]);
+                    form[0].scrollIntoView({behavior: 'smooth'});
+                });
+
+                cancel.on('click', function () {
+                    fill(null);
+                });
+            });
+        </script>
+    <?php endif; ?>
+</div>

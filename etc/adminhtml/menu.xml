@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Backend:etc/menu.xsd">
+    <menu>
+        <add id="Tonyapps_B2b::companies"
+             title="Companies"
+             translate="title"
+             module="Tonyapps_B2b"
+             sortOrder="50"
+             parent="Magento_Customer::customer"
+             action="tonyapps_b2b/company/index"
+             resource="Tonyapps_B2b::companies"/>
+    </menu>
+</config>
