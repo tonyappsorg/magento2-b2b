@@ -123,11 +123,13 @@ class StoreCredit
      * Give back what an order took, when the order is cancelled.
      *
      * Works from the ledger rather than the order total: only what was actually spent on this
-     * order comes back, and only once however many times a cancel is triggered.
+     * order comes back, and only once however many times a cancel is triggered. Capped at
+     * $canceledAmount so a partly invoiced order keeps paying for what was invoiced.
      */
-    public function revertOrder(int $companyId, int $orderId, ?string $incrementId): ?float
+    public function revertOrder(int $companyId, int $orderId, string $incrementId, float $canceledAmount): ?float
     {
-        $spent = -$this->creditHistory->getNetForOrder($orderId);
+        $spent = -$this->creditHistory->getNetForOrder($this->getPoolCompanyId($companyId), $incrementId);
+        $spent = min($spent, $canceledAmount);
         if ($spent < self::EPSILON) {
             return null;
         }

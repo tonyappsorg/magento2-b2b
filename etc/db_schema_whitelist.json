@@ -119,7 +119,8 @@
         },
         "index": {
             "TONYAPPS_B2B_CREDIT_HISTORY_COMPANY_ID_CREATED_AT": true,
-            "TONYAPPS_B2B_CREDIT_HISTORY_ORDER_ID": true
+            "TONYAPPS_B2B_CREDIT_HISTORY_ORDER_ID": true,
+            "TONYAPPS_B2B_CREDIT_HISTORY_COMPANY_ID_ORDER_INCREMENT_ID": true
         }
     }
 }

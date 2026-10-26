@@ -59,6 +59,24 @@ class Company extends AbstractDb
     }
 
     /**
+     * Never write credit_balance from a model save.
+     *
+     * Only StoreCredit moves the balance, under a row lock and with a ledger entry. A model loaded
+     * before a checkout (the admin form, an API call) would otherwise write its stale balance back.
+     *
+     * @param \Magento\Framework\DataObject $object
+     * @param string $table
+     * @return array<string, mixed>
+     */
+    protected function _prepareDataForTable(\Magento\Framework\DataObject $object, $table)
+    {
+        $data = parent::_prepareDataForTable($object, $table);
+        unset($data[CompanyInterface::CREDIT_BALANCE]);
+
+        return $data;
+    }
+
+    /**
      * @param AbstractModel $object
      * @return $this
      */

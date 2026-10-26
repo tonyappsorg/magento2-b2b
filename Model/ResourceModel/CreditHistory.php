@@ -39,13 +39,17 @@ class CreditHistory extends AbstractDb
      *
      * A debit is negative and a refund positive, so a non-negative total means everything spent on
      * that order has already been given back — the guard against refunding twice.
+     *
+     * Matched by order number, not order_id: the debit is written before the order row exists, so
+     * its order_id is NULL.
      */
-    public function getNetForOrder(int $orderId): float
+    public function getNetForOrder(int $poolCompanyId, string $incrementId): float
     {
         $connection = $this->getConnection();
         $select = $connection->select()
             ->from($this->getMainTable(), new \Zend_Db_Expr('COALESCE(SUM(delta), 0)'))
-            ->where('order_id = ?', $orderId);
+            ->where('company_id = ?', $poolCompanyId)
+            ->where('order_increment_id = ?', $incrementId);
 
         return (float)$connection->fetchOne($select);
     }

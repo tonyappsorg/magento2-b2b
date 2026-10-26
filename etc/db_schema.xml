@@ -134,8 +134,9 @@
             <column name="company_id"/>
             <column name="created_at"/>
         </index>
-        <index referenceId="TONYAPPS_B2B_CREDIT_HISTORY_ORDER_ID" indexType="btree">
-            <column name="order_id"/>
+        <index referenceId="TONYAPPS_B2B_CREDIT_HISTORY_COMPANY_ID_ORDER_INCREMENT_ID" indexType="btree">
+            <column name="company_id"/>
+            <column name="order_increment_id"/>
         </index>
     </table>
 

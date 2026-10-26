@@ -172,9 +172,9 @@ class StoreCreditTest extends TestCase
     {
         $this->balance = 70.0;
         // Ledger says 30 was spent on this order and nothing given back yet.
-        $this->creditHistory->method('getNetForOrder')->with(555)->willReturn(-30.0);
+        $this->creditHistory->method('getNetForOrder')->with(1, '000000555')->willReturn(-30.0);
 
-        self::assertSame(100.0, $this->storeCredit->revertOrder(9, 555, '000000555'));
+        self::assertSame(100.0, $this->storeCredit->revertOrder(9, 555, '000000555', 1000.0));
         self::assertSame(StoreCredit::TYPE_REVERT, $this->inserts[0]['type']);
     }
 
@@ -182,7 +182,7 @@ class StoreCreditTest extends TestCase
     {
         $this->creditHistory->method('getNetForOrder')->willReturn(0.0);
 
-        self::assertNull($this->storeCredit->revertOrder(9, 555, '000000555'));
+        self::assertNull($this->storeCredit->revertOrder(9, 555, '000000555', 1000.0));
         self::assertSame([], $this->inserts);
     }
 
@@ -192,7 +192,16 @@ class StoreCreditTest extends TestCase
         // Spent 30, already refunded 10: 20 still outstanding.
         $this->creditHistory->method('getNetForOrder')->willReturn(-20.0);
 
-        self::assertSame(100.0, $this->storeCredit->revertOrder(9, 555, '000000555'));
+        self::assertSame(100.0, $this->storeCredit->revertOrder(9, 555, '000000555', 1000.0));
+    }
+
+    public function testCancellingAPartlyInvoicedOrderGivesBackOnlyTheCanceledPart(): void
+    {
+        $this->balance = 70.0;
+        // Spent 30, of which 12 was invoiced before the cancel.
+        $this->creditHistory->method('getNetForOrder')->willReturn(-30.0);
+
+        self::assertSame(88.0, $this->storeCredit->revertOrder(9, 555, '000000555', 18.0));
     }
 
     public function testCanCoverComparesAgainstTheBalance(): void

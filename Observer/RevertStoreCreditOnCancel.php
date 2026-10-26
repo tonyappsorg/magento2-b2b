@@ -36,7 +36,12 @@ class RevertStoreCreditOnCancel implements ObserverInterface
         }
 
         try {
-            $this->storeCredit->revertOrder($companyId, (int)$order->getId(), (string)$order->getIncrementId());
+            $this->storeCredit->revertOrder(
+                $companyId,
+                (int)$order->getId(),
+                (string)$order->getIncrementId(),
+                (float)$order->getBaseTotalCanceled()
+            );
         } catch (\Exception $exception) {
             $this->logger->error(
                 sprintf(
