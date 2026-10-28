@@ -34,8 +34,9 @@ adopted.
    orders.
 3. **Membership = one company per customer, admin assignment or invite.** A single `company_id`
    per customer. No multi-company switching.
-4. **Out of scope for the core module:** order approval is an optional separate addon. Purchase
-   orders, negotiable quotes, requisition lists and shared catalogs remain out of scope.
+4. **Out of scope for the core module:** order approval and SKU quick ordering are optional
+   separate addons. Purchase orders, negotiable quotes, saved requisition lists and shared catalogs
+   remain out of scope.
 
 ## Optional addon: order approval
 
@@ -55,6 +56,15 @@ order requires approval.
 The first release supports one approval by the direct company administrator. Role-based approvers
 and multi-step approval chains are not included. The addon does not store payment data in its
 approval records.
+
+## Optional addon: quick order
+
+`Tonyapps_B2bQuickOrder` adds SKU/quantity entry and CSV upload for company members on Magento
+Open Source. It requires `Tonyapps_B2b`. Buyers can submit up to 500 lines (1 MB maximum) and add
+supported simple or virtual products to the regular cart. Valid lines are retained when other rows
+are invalid, with errors shown for the rejected lines. The existing cart and checkout remain in
+use, including payment restrictions and order approval. Configurable products and saved company
+lists are not included in the first release.
 
 ## What we are NOT building because Magento already does it
 
@@ -126,6 +136,7 @@ quote/payment guard for `place_order`.
 | Restrict payment methods per company | `payment_method_is_active` observer against the resolved allowed list. ~30 lines — the whole feature |
 | Store credit | Offline method via `Payment\Model\Method\Adapter` (a di.xml virtual type, not the deprecated `AbstractMethod`); availability = member of a company **and** root balance ≥ grand total; debit on order place inside a transaction with `SELECT … FOR UPDATE` on the root row (concurrent checkouts must not double-spend); credit back on credit memo and on cancel; admin "Credit" tab (balance, adjust, history) and a storefront credit page behind `credit_view` |
 | Order approval | Optional `Tonyapps_B2bOrderApproval` addon; members submit qualifying carts for company-admin approval before completing checkout |
+| Quick ordering | Optional `Tonyapps_B2bQuickOrder` addon; bulk SKU and quantity entry or CSV upload adds supported products to the regular cart |
 | Pricing/promotions by group | Company holds `customer_group_id`; sync members on company save and on member add; block manual per-member group edits unless an override flag is set |
 
 Cross-cutting: `etc/config.xml` + `system.xml` section `tonyapps_b2b` (master enable, frontend
