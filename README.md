@@ -34,8 +34,27 @@ adopted.
    orders.
 3. **Membership = one company per customer, admin assignment or invite.** A single `company_id`
    per customer. No multi-company switching.
-4. **Out of scope for v1:** order approval flows / purchase orders, negotiable quotes,
-   requisition lists, shared catalogs.
+4. **Out of scope for the core module:** order approval is an optional separate addon. Purchase
+   orders, negotiable quotes, requisition lists and shared catalogs remain out of scope.
+
+## Optional addon: order approval
+
+[`Tonyapps_B2bOrderApproval`](https://github.com/tonyappsorg/magento2-b2b-order-approval) adds a
+checkout approval workflow without making it mandatory for every B2B installation. It requires
+`Tonyapps_B2b` and is enabled separately under **Stores > Configuration > Tonyapps > B2B Order
+Approval**.
+
+When enabled, a company member whose cart base subtotal meets the configured website threshold
+requests approval from the cart page. The company administrator can review the buyer and cart
+contents, then approve or reject the request. Approval lets the buyer return to the cart and
+complete normal checkout; it does not place an order or authorize payment. Checkout is blocked
+until approval and if the cart contents change after approval. Company administrators can place
+orders directly. The threshold is in website base currency; zero means every non-admin company
+order requires approval.
+
+The first release supports one approval by the direct company administrator. Role-based approvers
+and multi-step approval chains are not included. The addon does not store payment data in its
+approval records.
 
 ## What we are NOT building because Magento already does it
 
@@ -106,6 +125,7 @@ quote/payment guard for `place_order`.
 | Assign users from backend | `customer_form` UI modifier adding a Company fieldset (company + role) with a save handler, plus a customer-grid mass action |
 | Restrict payment methods per company | `payment_method_is_active` observer against the resolved allowed list. ~30 lines — the whole feature |
 | Store credit | Offline method via `Payment\Model\Method\Adapter` (a di.xml virtual type, not the deprecated `AbstractMethod`); availability = member of a company **and** root balance ≥ grand total; debit on order place inside a transaction with `SELECT … FOR UPDATE` on the root row (concurrent checkouts must not double-spend); credit back on credit memo and on cancel; admin "Credit" tab (balance, adjust, history) and a storefront credit page behind `credit_view` |
+| Order approval | Optional `Tonyapps_B2bOrderApproval` addon; members submit qualifying carts for company-admin approval before completing checkout |
 | Pricing/promotions by group | Company holds `customer_group_id`; sync members on company save and on member add; block manual per-member group edits unless an override flag is set |
 
 Cross-cutting: `etc/config.xml` + `system.xml` section `tonyapps_b2b` (master enable, frontend
