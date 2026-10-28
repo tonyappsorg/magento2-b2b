@@ -93,7 +93,9 @@ class CompanyContext
      */
     public function isAllowed(string $permission): bool
     {
-        return $this->permissionChecker->isAllowed($this->getCustomerId(), $this->getCompany(), $permission);
+        // The master switch turns off everything the storefront gates on a permission.
+        return $this->isEnabled()
+            && $this->permissionChecker->isAllowed($this->getCustomerId(), $this->getCompany(), $permission);
     }
 
     /**
@@ -106,7 +108,7 @@ class CompanyContext
         $company = $this->getCompany();
         $customerId = $this->getCustomerId();
 
-        return $company === null || $customerId === null
+        return $company === null || $customerId === null || !$this->isEnabled()
             ? []
             : $this->permissionChecker->getPermissions($customerId, $company);
     }

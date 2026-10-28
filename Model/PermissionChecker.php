@@ -7,6 +7,7 @@ use Magento\Framework\Exception\NoSuchEntityException;
 use Tonyapps\B2b\Api\Data\CompanyInterface;
 use Tonyapps\B2b\Api\Data\RoleInterface;
 use Tonyapps\B2b\Api\RoleRepositoryInterface;
+use Tonyapps\B2b\Model\ResourceModel\Company as CompanyResource;
 use Tonyapps\B2b\Model\ResourceModel\CompanyCustomer;
 
 /**
@@ -31,7 +32,8 @@ class PermissionChecker
     public function __construct(
         private readonly CompanyCustomer $companyCustomer,
         private readonly RoleRepositoryInterface $roleRepository,
-        private readonly Permissions $permissions
+        private readonly Permissions $permissions,
+        private readonly CompanyResource $companyResource
     ) {
     }
 
@@ -67,7 +69,8 @@ class PermissionChecker
      */
     private function resolve(int $customerId, CompanyInterface $company): array
     {
-        if ($company->getStatus() !== CompanyInterface::STATUS_ACTIVE) {
+        // A blocked or pending parent switches off its whole subtree.
+        if (!$this->companyResource->isActivePath((int)$company->getId())) {
             return [];
         }
 

@@ -6,6 +6,7 @@ namespace Tonyapps\B2b\Block\Company;
 use Magento\Framework\View\Element\Template;
 use Magento\Framework\View\Element\Template\Context;
 use Magento\Sales\Model\Order;
+use Magento\Sales\Model\Order\Config as OrderConfig;
 use Magento\Sales\Model\ResourceModel\Order\CollectionFactory as OrderCollectionFactory;
 use Magento\Theme\Block\Html\Pager;
 use Tonyapps\B2b\Model\CompanyContext;
@@ -28,6 +29,7 @@ class Orders extends Template
         private readonly CompanyContext $companyContext,
         private readonly CompanyResource $companyResource,
         private readonly OrderCollectionFactory $orderCollectionFactory,
+        private readonly OrderConfig $orderConfig,
         array $data = []
     ) {
         parent::__construct($context, $data);
@@ -55,7 +57,9 @@ class Orders extends Template
         $collection
             ->addFieldToSelect(['increment_id', 'created_at', 'status', 'grand_total', 'customer_id', 'company_id'])
             ->addFieldToFilter('company_id', ['in' => $this->companyResource->getSubtreeIds((int)$company->getId())])
-            ->addFieldToFilter('state', ['nin' => [Order::STATE_NEW, Order::STATE_PENDING_PAYMENT]])
+            // The same rule as core's own order history and AllowCompanyOrderView: statuses marked visible on
+            // the storefront. Filtering out state "new" hid every store-credit order, which stays "new".
+            ->addFieldToFilter('status', ['in' => $this->orderConfig->getVisibleOnFrontStatuses()])
             ->setOrder('created_at', 'desc');
 
         $collection->setPageSize(self::PAGE_SIZE)

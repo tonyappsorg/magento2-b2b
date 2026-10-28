@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace Tonyapps\B2b\Model;
 
-use Tonyapps\B2b\Api\Data\CompanyInterface;
 use Tonyapps\B2b\Api\MembershipManagementInterface;
 use Tonyapps\B2b\Api\CompanyRepositoryInterface;
 use Magento\Framework\Exception\NoSuchEntityException;
@@ -72,9 +71,9 @@ class PaymentRestriction
             return null;
         }
 
-        // A company that is not active has no say over payment; its people are ordinary customers
-        // until an administrator approves or unblocks it.
-        if ($company->getStatus() !== CompanyInterface::STATUS_ACTIVE) {
+        // A company that is not active, or sits under one that isn't, has no say over payment; its people
+        // are ordinary customers until an administrator approves or unblocks it.
+        if (!$this->companyResource->isActivePath((int)$company->getId())) {
             return null;
         }
 

@@ -484,3 +484,32 @@ causes, both pre-existing and unrelated to Tonyapps_B2b:
     to `Riskified_Decider`.
 11. **OneStepCheckout** — currently disabled. If it is re-enabled later, the store-credit method
     needs its Vue checkout wired up too; v1 targets Luma only.
+
+## Review fixes (2026-10-28)
+
+- **Store credit is refunded on cancel** (by order number; `order_id` may be empty when the debit runs), capped at
+  the order's cancelled total so a partly invoiced order keeps paying for what was invoiced.
+- **The admin company form can't overwrite the balance**: the resource model never writes `credit_balance`; only
+  `StoreCredit` moves it, under a row lock with a ledger entry.
+- **A blocked or pending company switches off its whole subtree**: permissions, payment rules, store credit and
+  the customer group all check every company on the path (`ResourceModel\Company::isActivePath`).
+- **Leaving or moving company** takes back only the group the old company gave: a group set by hand is kept, and
+  moving to a company without a group drops the old company's pricing. Group changes reach logged-in shoppers on
+  their next request (core's customer notification storage).
+- **Company Orders** lists orders by the statuses visible on the storefront, like core's own order history, so
+  store-credit orders (state `new`) show.
+- **Adding users**: an email that already has an account is refused on the storefront; that person never agreed
+  to join. An administrator can still assign them. Nobody can change their own role.
+- **`credit_use`** ("Pay with the company's store credit") is the planned `place_order`, narrowed to the shared
+  money: members still check out with their own card. Only the company admin and roles with it ticked can pay with
+  store credit; existing roles need it ticked. Admin-created orders aren't affected.
+- **Master switch** (`tonyapps_b2b/general/enabled`) turns off the storefront: company pages, registration, every
+  permission check (including viewing colleagues' orders), payment rules and the store credit method. Refunds and
+  cancellations of credit already spent keep working, and the admin pages stay available.
+- **Credit and companies**: a company that holds a balance or ledger, or whose subtree paid with store credit,
+  can't be deleted or moved to another parent (refunds would go to the wrong pool). Block it instead.
+- **Admin**: adjusting credit needs its own permission, `Tonyapps_B2b::credit`, and amounts are read in the
+  admin's locale ("1,234.50" in English, "1.234,50" in German).
+- **Plan corrections**: there is no separate "credit enable" setting; the store credit payment method's own
+  *Enabled* flag (Sales > Payment Methods) is that switch. There is no "auto-refund" setting either: credit memos
+  and cancellations always return credit to the pool.

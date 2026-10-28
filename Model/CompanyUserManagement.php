@@ -6,6 +6,7 @@ namespace Tonyapps\B2b\Model;
 use Magento\Customer\Api\AccountManagementInterface;
 use Magento\Customer\Api\CustomerRepositoryInterface;
 use Magento\Customer\Api\Data\CustomerInterfaceFactory;
+use Magento\Framework\Api\SearchCriteriaBuilder;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\Exception\State\InputMismatchException;
@@ -22,6 +23,10 @@ use Tonyapps\B2b\Model\ResourceModel\CompanyCustomer;
  * "invited, not yet accepted" state to track. They get Magento's own "set a password" email, the
  * same one an administrator-created customer gets. Add an invitation table only if someone needs
  * to see who has not accepted yet.
+ *
+ * An email that already has an account is refused here: that person never agreed to join, and joining
+ * changes their customer group (their prices) and lets the company see their orders. An administrator
+ * can still assign an existing customer from the admin.
  */
 class CompanyUserManagement
 {
@@ -32,7 +37,8 @@ class CompanyUserManagement
         private readonly MembershipManagementInterface $membership,
         private readonly CompanyCustomer $companyCustomer,
         private readonly StoreManagerInterface $storeManager,
-        private readonly RoleRepositoryInterface $roleRepository
+        private readonly RoleRepositoryInterface $roleRepository,
+        private readonly SearchCriteriaBuilder $searchCriteriaBuilder
     ) {
     }
 
@@ -43,17 +49,15 @@ class CompanyUserManagement
      */
     public function getUsers(int $companyId): array
     {
-        $users = [];
-        foreach ($this->companyCustomer->getMemberIds([$companyId]) as $customerId) {
-            try {
-                $users[] = $this->customerRepository->getById($customerId);
-            } catch (NoSuchEntityException) {
-                // A customer deleted from under us; the link row goes with them via the foreign key.
-                continue;
-            }
+        $memberIds = $this->companyCustomer->getMemberIds([$companyId]);
+        if (!$memberIds) {
+            return [];
         }
 
-        return $users;
+        // One query for everyone; a customer deleted from under us takes the link row with them via the FK.
+        return array_values($this->customerRepository->getList(
+            $this->searchCriteriaBuilder->addFilter('entity_id', $memberIds, 'in')->create()
+        )->getItems());
     }
 
     /**
@@ -80,17 +84,10 @@ class CompanyUserManagement
 
         $websiteId = (int)$this->storeManager->getStore()->getWebsiteId();
 
-        $existing = $this->findCustomer($email, $websiteId);
-        if ($existing !== null) {
-            if ($this->membership->getCompanyId((int)$existing->getId()) !== null) {
-                throw new LocalizedException(
-                    __('%1 already belongs to a company.', $email)
-                );
-            }
-
-            $this->membership->assign((int)$existing->getId(), (int)$company->getId(), $roleId);
-
-            return (int)$existing->getId();
+        if ($this->findCustomer($email, $websiteId) !== null) {
+            throw new LocalizedException(
+                __('%1 already has an account with us. Contact us to have it added to your company.', $email)
+            );
         }
 
         $customer = $this->customerFactory->create();
@@ -137,8 +134,13 @@ class CompanyUserManagement
      *
      * @throws LocalizedException
      */
-    public function setUserRole(CompanyInterface $company, int $customerId, ?int $roleId): void
+    public function setUserRole(CompanyInterface $company, int $customerId, ?int $roleId, ?int $actingCustomerId = null): void
     {
+        if ($actingCustomerId !== null && $actingCustomerId === $customerId) {
+            // Otherwise anyone allowed to manage users could hand themselves any role the company has.
+            throw new LocalizedException(__('You cannot change your own role.'));
+        }
+
         if ($this->membership->getCompanyId($customerId) !== (int)$company->getId()) {
             throw new LocalizedException(__('That user is not part of your company.'));
         }
@@ -160,15 +162,7 @@ class CompanyUserManagement
      */
     public function getRoleIds(array $customerIds): array
     {
-        $roleIds = [];
-        foreach ($customerIds as $customerId) {
-            $roleId = $this->companyCustomer->getRoleId((int)$customerId);
-            if ($roleId !== null) {
-                $roleIds[(int)$customerId] = $roleId;
-            }
-        }
-
-        return $roleIds;
+        return $this->companyCustomer->getRoleIds(array_map('intval', $customerIds));
     }
 
     /**

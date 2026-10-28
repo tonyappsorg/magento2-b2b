@@ -8,6 +8,7 @@ use Magento\Framework\Exception\NoSuchEntityException;
 use Tonyapps\B2b\Api\CompanyRepositoryInterface;
 use Tonyapps\B2b\Api\Data\CompanyInterface;
 use Tonyapps\B2b\Model\ResourceModel\Company as CompanyResource;
+use Tonyapps\B2b\Model\ResourceModel\Company\CollectionFactory as CompanyCollectionFactory;
 
 /**
  * Child companies, managed by a parent company's own people.
@@ -40,7 +41,8 @@ class ChildCompanyManagement
         private readonly CompanyRepositoryInterface $companyRepository,
         private readonly CompanyFactory $companyFactory,
         private readonly CompanyResource $companyResource,
-        private readonly CustomerGroupSync $customerGroupSync
+        private readonly CustomerGroupSync $customerGroupSync,
+        private readonly CompanyCollectionFactory $companyCollectionFactory
     ) {
     }
 
@@ -56,14 +58,14 @@ class ChildCompanyManagement
             [(int)$parent->getId()]
         );
 
-        $children = [];
-        foreach ($descendantIds as $companyId) {
-            try {
-                $children[] = $this->companyRepository->getById((int)$companyId);
-            } catch (NoSuchEntityException) {
-                continue;
-            }
+        if (!$descendantIds) {
+            return [];
         }
+
+        /** @var CompanyInterface[] $children */
+        $children = array_values($this->companyCollectionFactory->create()
+            ->addFieldToFilter(CompanyInterface::ENTITY_ID, ['in' => array_values($descendantIds)])
+            ->getItems());
 
         usort(
             $children,
@@ -82,7 +84,7 @@ class ChildCompanyManagement
      */
     public function create(CompanyInterface $parent, array $data): CompanyInterface
     {
-        if (!$parent->isActive()) {
+        if (!$this->companyResource->isActivePath((int)$parent->getId())) {
             throw new LocalizedException(
                 __('Your company has to be active before it can have child companies.')
             );

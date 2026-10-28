@@ -18,6 +18,11 @@ use Tonyapps\B2b\Model\Permissions;
  */
 class Users extends Template
 {
+    /**
+     * @var array<int, int>|null
+     */
+    private ?array $roleIds = null;
+
     public function __construct(
         Context $context,
         private readonly CompanyContext $companyContext,
@@ -65,7 +70,12 @@ class Users extends Template
      */
     public function getRoleId(CustomerInterface $customer): ?int
     {
-        return $this->userManagement->getRoleIds([(int)$customer->getId()])[(int)$customer->getId()] ?? null;
+        // One query for the whole list instead of one per row.
+        $this->roleIds ??= $this->userManagement->getRoleIds(
+            array_map(static fn(CustomerInterface $user): int => (int)$user->getId(), $this->getUsers())
+        );
+
+        return $this->roleIds[(int)$customer->getId()] ?? null;
     }
 
     public function getSetRoleUrl(CustomerInterface $customer): string

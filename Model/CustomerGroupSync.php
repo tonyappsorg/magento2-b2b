@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Tonyapps\B2b\Model;
 
 use Magento\Customer\Api\GroupManagementInterface;
+use Magento\Customer\Model\Customer\NotificationStorage;
 use Magento\Customer\Model\Indexer\Processor as CustomerIndexer;
 use Magento\Framework\App\ResourceConnection;
 use Tonyapps\B2b\Api\Data\CompanyInterface;
@@ -18,7 +19,7 @@ use Tonyapps\B2b\Model\ResourceModel\CompanyCustomer;
  * only thing this module has to do.
  *
  * One rule decides everything here: **a company confers its resolved group on its members only
- * while it is Active.** A company that resolves to no group never touches anyone. A company that
+ * while it and every company above it are Active.** A company that resolves to no group never touches anyone. A company that
  * would resolve to a group but is pending, rejected or blocked puts its members in the default
  * group instead — so a self-registered company cannot hand itself wholesale pricing before an
  * administrator has approved it.
@@ -27,7 +28,8 @@ use Tonyapps\B2b\Model\ResourceModel\CompanyCustomer;
  * are re-indexed by hand, instead of loading and saving every customer through
  * CustomerRepository. A company can have thousands of members and a repository save each would
  * take minutes; the trade is that customer_save_* observers do not fire for a group change made
- * this way. Switch to the repository if something ever needs to observe it.
+ * this way. Switch to the repository if something ever needs to observe it. Logged-in sessions are
+ * still refreshed, through core's customer notification storage.
  */
 class CustomerGroupSync
 {
@@ -37,7 +39,8 @@ class CustomerGroupSync
         private readonly CompanyCustomer $companyCustomer,
         private readonly SettingResolver $settingResolver,
         private readonly GroupManagementInterface $groupManagement,
-        private readonly CustomerIndexer $customerIndexer
+        private readonly CustomerIndexer $customerIndexer,
+        private readonly NotificationStorage $notificationStorage
     ) {
     }
 
@@ -64,33 +67,49 @@ class CustomerGroupSync
     /**
      * Apply the group that follows from a customer's company membership.
      *
-     * Joining a company that manages no group leaves the customer's group alone; leaving a
-     * company, or joining one that is not active, puts them in the default group.
+     * Joining an active company that manages a group applies it; joining one that is not active
+     * puts them in the default group. Otherwise only the previous company's group is taken back: a
+     * customer still in the group their old company gave them returns to the default group, while
+     * a group an administrator set by hand, or one no company ever gave, is left alone.
      */
-    public function syncCustomer(int $customerId, ?int $companyId): void
+    public function syncCustomer(int $customerId, ?int $companyId, ?int $previousCompanyId = null): void
+    {
+        $groupId = $this->resolveGroupId($companyId);
+        if ($groupId !== null) {
+            if ($this->isActive((int)$companyId)) {
+                $this->reindex($this->applyGroup([$customerId], $groupId));
+            } else {
+                $this->resetToDefaultGroup([$customerId]);
+            }
+
+            return;
+        }
+
+        $previousGroupId = $this->resolveGroupId($previousCompanyId);
+        if ($previousGroupId !== null && $this->getCurrentGroupId($customerId) === $previousGroupId) {
+            $this->resetToDefaultGroup([$customerId]);
+        }
+    }
+
+    private function resolveGroupId(?int $companyId): ?int
     {
         if ($companyId === null) {
-            $this->resetToDefaultGroup([$customerId]);
-
-            return;
+            return null;
         }
+        $path = $this->companyResource->getPathById($companyId);
 
-        $groupId = $this->settingResolver->resolveCustomerGroupId(
-            $this->companyResource->getPathById($companyId)
+        return $path === null ? null : $this->settingResolver->resolveCustomerGroupId($path);
+    }
+
+    private function getCurrentGroupId(int $customerId): int
+    {
+        $connection = $this->resourceConnection->getConnection();
+
+        return (int)$connection->fetchOne(
+            $connection->select()
+                ->from($this->resourceConnection->getTableName('customer_entity'), 'group_id')
+                ->where('entity_id = ?', $customerId)
         );
-
-        if ($groupId === null) {
-            // Nothing on this company's path manages a group, so nothing here should move.
-            return;
-        }
-
-        if (!$this->isActive($companyId)) {
-            $this->resetToDefaultGroup([$customerId]);
-
-            return;
-        }
-
-        $this->reindex($this->applyGroup([$customerId], $groupId));
     }
 
     /**
@@ -122,6 +141,15 @@ class CustomerGroupSync
 
         $paths = array_map(static fn(array $row): string => $row['path'], $subtree);
         $resolved = $this->settingResolver->resolveCustomerGroupIds($paths);
+        // A blocked ancestor above the subtree switches it off too: fetch the statuses of those as well.
+        $statuses = array_map(static fn(array $row): int => (int)$row['status'], $subtree);
+        $ancestorIds = array_diff(
+            array_map('intval', explode(CompanyInterface::PATH_SEPARATOR, implode(CompanyInterface::PATH_SEPARATOR, $paths))),
+            array_keys($subtree)
+        );
+        if ($ancestorIds) {
+            $statuses += $this->companyResource->getStatusesByIds(array_values($ancestorIds));
+        }
 
         $companyIdsByGroup = [];
         foreach ($subtree as $subtreeCompanyId => $row) {
@@ -130,7 +158,7 @@ class CustomerGroupSync
                 continue;
             }
 
-            $entitled = !$release && $row['status'] === CompanyInterface::STATUS_ACTIVE;
+            $entitled = !$release && $this->isPathActive($row['path'], $statuses);
             $groupId = $entitled ? $resolved[$subtreeCompanyId] : $this->getDefaultGroupId();
             $companyIdsByGroup[$groupId][] = (int)$subtreeCompanyId;
         }
@@ -145,7 +173,21 @@ class CustomerGroupSync
 
     private function isActive(int $companyId): bool
     {
-        return $this->companyResource->getStatusById($companyId) === CompanyInterface::STATUS_ACTIVE;
+        return $this->companyResource->isActivePath($companyId);
+    }
+
+    /**
+     * @param array<int, int> $statuses
+     */
+    private function isPathActive(string $path, array $statuses): bool
+    {
+        foreach (explode(CompanyInterface::PATH_SEPARATOR, $path) as $id) {
+            if (($statuses[(int)$id] ?? null) !== CompanyInterface::STATUS_ACTIVE) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     private function getDefaultGroupId(): int
@@ -176,6 +218,11 @@ class CustomerGroupSync
 
         if ($changed) {
             $connection->update($table, ['group_id' => $groupId], ['entity_id IN (?)' => $changed]);
+            // The raw update skips core's save, so tell logged-in sessions to reload the customer and pick
+            // up the new group (prices, cart rules) on their next request.
+            foreach ($changed as $customerId) {
+                $this->notificationStorage->add(NotificationStorage::UPDATE_CUSTOMER_SESSION, $customerId);
+            }
         }
 
         return $changed;

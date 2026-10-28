@@ -9,6 +9,7 @@ use Magento\Backend\Model\Auth\Session as AuthSession;
 use Magento\Framework\App\Action\HttpPostActionInterface;
 use Magento\Framework\Controller\Result\Redirect;
 use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\Locale\ResolverInterface;
 use Tonyapps\B2b\Model\StoreCredit;
 
 /**
@@ -16,12 +17,14 @@ use Tonyapps\B2b\Model\StoreCredit;
  */
 class Adjust extends Action implements HttpPostActionInterface
 {
-    public const ADMIN_RESOURCE = 'Tonyapps_B2b::companies';
+    // Moving money gets its own permission: managing companies doesn't imply it.
+    public const ADMIN_RESOURCE = 'Tonyapps_B2b::credit';
 
     public function __construct(
         Context $context,
         private readonly StoreCredit $storeCredit,
-        private readonly AuthSession $authSession
+        private readonly AuthSession $authSession,
+        private readonly ResolverInterface $localeResolver
     ) {
         parent::__construct($context);
     }
@@ -66,12 +69,25 @@ class Adjust extends Action implements HttpPostActionInterface
     }
 
     /**
-     * Accepts both "1234.56" and the "1 234,56" a European admin is likely to type.
+     * Read the amount the way the admin's own locale writes numbers: "1,234.50" in English, "1.234,50" in
+     * German. Plain "1234.5" works everywhere. The whole input has to be a number, so "12abc" is refused
+     * rather than read as 12.
      */
     private function parseAmount(string $raw): ?float
     {
-        $normalised = str_replace([' ', ','], ['', '.'], trim($raw));
+        $raw = trim(str_replace(["\u{00A0}", "\u{202F}"], ' ', $raw));
+        if ($raw === '') {
+            return null;
+        }
+        foreach ([$this->localeResolver->getLocale(), 'en_US'] as $locale) {
+            $position = 0;
+            $value = (new \NumberFormatter($locale, \NumberFormatter::DECIMAL))
+                ->parse($raw, \NumberFormatter::TYPE_DOUBLE, $position);
+            if ($value !== false && $position === strlen($raw)) {
+                return abs($value);
+            }
+        }
 
-        return is_numeric($normalised) ? abs((float)$normalised) : null;
+        return null;
     }
 }

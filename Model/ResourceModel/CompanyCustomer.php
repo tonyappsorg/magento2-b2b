@@ -60,6 +60,26 @@ class CompanyCustomer extends AbstractDb
     }
 
     /**
+     * Roles held by several customers in one query; customers on the company default are absent.
+     *
+     * @param int[] $customerIds
+     * @return array<int, int>
+     */
+    public function getRoleIds(array $customerIds): array
+    {
+        if (!$customerIds) {
+            return [];
+        }
+        $connection = $this->getConnection();
+        $select = $connection->select()
+            ->from($this->getMainTable(), ['customer_id', 'role_id'])
+            ->where('customer_id IN (?)', $customerIds)
+            ->where('role_id IS NOT NULL');
+
+        return array_map('intval', $connection->fetchPairs($select));
+    }
+
+    /**
      * Remove a customer from whichever company they are in.
      */
     public function unassign(int $customerId): void

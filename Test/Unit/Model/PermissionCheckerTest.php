@@ -5,6 +5,7 @@ namespace Tonyapps\B2b\Test\Unit\Model;
 
 use Magento\Framework\Exception\NoSuchEntityException;
 use PHPUnit\Framework\MockObject\MockObject;
+use Tonyapps\B2b\Model\ResourceModel\Company as CompanyResource;
 use PHPUnit\Framework\TestCase;
 use Tonyapps\B2b\Api\Data\CompanyInterface;
 use Tonyapps\B2b\Api\Data\RoleInterface;
@@ -21,6 +22,7 @@ class PermissionCheckerTest extends TestCase
     private CompanyCustomer&MockObject $companyCustomer;
     private RoleRepositoryInterface&MockObject $roleRepository;
     private PermissionChecker $checker;
+    private bool $pathActive = true;
 
     protected function setUp(): void
     {
@@ -32,7 +34,8 @@ class PermissionCheckerTest extends TestCase
         $this->checker = new PermissionChecker(
             $this->companyCustomer,
             $this->roleRepository,
-            new Permissions()
+            new Permissions(),
+            $this->companyResource()
         );
     }
 
@@ -41,12 +44,29 @@ class PermissionCheckerTest extends TestCase
         ?int $adminCustomerId = 1,
         int $companyId = 10
     ): CompanyInterface&MockObject {
+        $this->pathActive = $status === CompanyInterface::STATUS_ACTIVE;
         $company = $this->createMock(CompanyInterface::class);
         $company->method('getStatus')->willReturn($status);
         $company->method('getAdminCustomerId')->willReturn($adminCustomerId);
         $company->method('getId')->willReturn($companyId);
 
         return $company;
+    }
+
+    private function companyResource(): CompanyResource
+    {
+        $resource = $this->createMock(CompanyResource::class);
+        $resource->method('isActivePath')->willReturnCallback(fn(): bool => $this->pathActive);
+
+        return $resource;
+    }
+
+    public function testAMemberOfACompanyUnderABlockedParentHasNoPermissions(): void
+    {
+        $company = $this->company(CompanyInterface::STATUS_ACTIVE, 1);
+        $this->pathActive = false; // the company itself is active, its parent is blocked
+
+        self::assertSame([], $this->checker->getPermissions(1, $company));
     }
 
     private function role(array $permissions, int $companyId = 10): RoleInterface&MockObject
@@ -126,7 +146,8 @@ class PermissionCheckerTest extends TestCase
         $checker = new PermissionChecker(
             $this->companyCustomer,
             $roleRepository = $this->createMock(RoleRepositoryInterface::class),
-            new Permissions()
+            new Permissions(),
+            $this->companyResource()
         );
         $this->companyCustomer->method('getRoleId')->willReturn(3);
         $roleRepository->method('getById')->willReturn($this->role([Permissions::USERS_MANAGE], 999));

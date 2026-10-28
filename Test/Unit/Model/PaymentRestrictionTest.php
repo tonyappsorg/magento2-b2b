@@ -21,6 +21,7 @@ class PaymentRestrictionTest extends TestCase
     private SettingResolver&MockObject $settingResolver;
     private Config&MockObject $config;
     private PaymentRestriction $restriction;
+    private bool $pathActive = true;
 
     protected function setUp(): void
     {
@@ -33,7 +34,7 @@ class PaymentRestrictionTest extends TestCase
         $this->restriction = new PaymentRestriction(
             $this->membership,
             $this->companyRepository,
-            $this->createMock(CompanyResource::class),
+            $this->companyResource(),
             $this->settingResolver,
             $this->config
         );
@@ -41,11 +42,29 @@ class PaymentRestrictionTest extends TestCase
 
     private function inCompany(int $status = CompanyInterface::STATUS_ACTIVE): void
     {
+        $this->pathActive = $status === CompanyInterface::STATUS_ACTIVE;
         $company = $this->createMock(CompanyInterface::class);
         $company->method('getStatus')->willReturn($status);
         $company->method('getId')->willReturn(10);
         $this->membership->method('getCompanyId')->willReturn(10);
         $this->companyRepository->method('getById')->willReturn($company);
+    }
+
+    private function companyResource(): CompanyResource
+    {
+        $resource = $this->createMock(CompanyResource::class);
+        $resource->method('isActivePath')->willReturnCallback(fn(): bool => $this->pathActive);
+        $resource->method('getPathById')->willReturn('10');
+
+        return $resource;
+    }
+
+    public function testACompanyUnderABlockedParentIsNotRestricted(): void
+    {
+        $this->inCompany();
+        $this->pathActive = false;
+
+        self::assertNull($this->restriction->getAllowedMethods(7));
     }
 
     public function testAGuestIsNotRestricted(): void
@@ -111,7 +130,7 @@ class PaymentRestrictionTest extends TestCase
         $restriction = new PaymentRestriction(
             $this->membership,
             $this->companyRepository,
-            $this->createMock(CompanyResource::class),
+            $this->companyResource(),
             $this->settingResolver,
             $config
         );

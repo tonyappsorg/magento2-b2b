@@ -25,7 +25,8 @@ class Membership implements MembershipManagementInterface
      */
     public function assign(int $customerId, ?int $companyId, ?int $roleId = null): void
     {
-        if ($this->getCompanyId($customerId) === $companyId) {
+        $previousCompanyId = $this->getCompanyId($customerId);
+        if ($previousCompanyId === $companyId) {
             // Already in this company; the caller may still be changing their role.
             if ($companyId !== null && $roleId !== null) {
                 $this->setRole($customerId, $roleId);
@@ -42,7 +43,7 @@ class Membership implements MembershipManagementInterface
             $this->companyCustomer->assign($customerId, $companyId, $roleId);
         }
 
-        $this->customerGroupSync->syncCustomer($customerId, $companyId);
+        $this->customerGroupSync->syncCustomer($customerId, $companyId, $previousCompanyId);
     }
 
     public function setRole(int $customerId, ?int $roleId): void

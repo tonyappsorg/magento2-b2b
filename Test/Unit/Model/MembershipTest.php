@@ -40,7 +40,7 @@ class MembershipTest extends TestCase
             ->with(42)
             ->willReturn($this->createMock(CompanyInterface::class));
         $this->companyCustomer->expects(self::once())->method('assign')->with(7, 42);
-        $this->customerGroupSync->expects(self::once())->method('syncCustomer')->with(7, 42);
+        $this->customerGroupSync->expects(self::once())->method('syncCustomer')->with(7, 42, null);
 
         $this->membership->assign(7, 42);
     }
@@ -60,7 +60,7 @@ class MembershipTest extends TestCase
     {
         $this->companyCustomer->method('getCompanyId')->with(7)->willReturn(42);
         $this->companyCustomer->expects(self::once())->method('unassign')->with(7);
-        $this->customerGroupSync->expects(self::once())->method('syncCustomer')->with(7, null);
+        $this->customerGroupSync->expects(self::once())->method('syncCustomer')->with(7, null, 42);
 
         $this->membership->assign(7, null);
     }

@@ -64,6 +64,12 @@ class CompanyRepository implements CompanyRepositoryInterface
                 __('This company has child companies. Re-assign or delete them first.')
             );
         }
+        if ($companyId && $this->resource->hasCreditActivity($companyId)) {
+            // Deleting would cascade away the ledger, and refunds of its credit-paid orders would find no pool.
+            throw new CouldNotDeleteException(__(
+                'This company has used store credit, so it can\'t be deleted. Block it instead.'
+            ));
+        }
 
         // Take the company's group off its members while the membership rows still exist — they
         // go with the company (foreign key), and afterwards there is no way to tell who was in it.

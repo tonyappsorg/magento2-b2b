@@ -83,6 +83,11 @@ class Manage extends Template
         return (string)($labels[$entry['type'] ?? ''] ?? __('Movement'));
     }
 
+    public function canAdjust(): bool
+    {
+        return $this->_authorization->isAllowed('Tonyapps_B2b::credit');
+    }
+
     public function getAdjustUrl(): string
     {
         return $this->getUrl('tonyapps_b2b/credit/adjust', ['company_id' => $this->getCompanyId()]);

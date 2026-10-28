@@ -8,6 +8,7 @@ use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Model\AbstractModel;
 use Magento\Framework\Model\ResourceModel\Db\AbstractDb;
 use Tonyapps\B2b\Api\Data\CompanyInterface;
+use Tonyapps\B2b\Model\Payment\StoreCreditFacade;
 
 /**
  * Company resource model; owns the materialized path.
@@ -35,6 +36,17 @@ class Company extends AbstractDb
     {
         $parentId = $object->getData(CompanyInterface::PARENT_ID);
         $companyId = (int)$object->getId();
+
+        $previousParentId = $object->getOrigData(CompanyInterface::PARENT_ID);
+        if ($companyId
+            && (int)$previousParentId !== (int)$parentId
+            && $this->hasCreditActivity($companyId)
+        ) {
+            throw new LocalizedException(__(
+                'This company has used store credit, so it can\'t be moved to another parent: refunds and '
+                . 'cancellations of its orders have to go back to the pool they were paid from.'
+            ));
+        }
 
         if ($parentId === null || $parentId === '') {
             return parent::_beforeSave($object);
@@ -244,6 +256,91 @@ class Company extends AbstractDb
         }
 
         return $subtree;
+    }
+
+    /**
+     * Whether a company and every company above it are active. A blocked or pending parent switches off
+     * its whole subtree: permissions, payment rules, store credit and the customer group.
+     */
+    public function isActivePath(int $companyId): bool
+    {
+        $path = $this->getPathById($companyId);
+        if ($path === null) {
+            return false;
+        }
+
+        return $this->isEveryCompanyActive(array_map('intval', explode(CompanyInterface::PATH_SEPARATOR, $path)));
+    }
+
+    /**
+     * @param int[] $companyIds
+     */
+    public function isEveryCompanyActive(array $companyIds): bool
+    {
+        $statuses = $this->getStatusesByIds($companyIds);
+        if (count($statuses) !== count(array_unique($companyIds))) {
+            return false;
+        }
+        foreach ($statuses as $status) {
+            if ($status !== CompanyInterface::STATUS_ACTIVE) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * @param int[] $companyIds
+     * @return array<int, int> status keyed by company ID
+     */
+    public function getStatusesByIds(array $companyIds): array
+    {
+        if (!$companyIds) {
+            return [];
+        }
+        $connection = $this->getConnection();
+
+        return array_map('intval', $connection->fetchPairs(
+            $connection->select()
+                ->from($this->getMainTable(), [CompanyInterface::ENTITY_ID, CompanyInterface::STATUS])
+                ->where(CompanyInterface::ENTITY_ID . ' IN (?)', array_unique($companyIds))
+        ));
+    }
+
+    /**
+     * Whether store credit ties this company down: it holds a balance or ledger of its own, or someone in its
+     * subtree paid an order with store credit. Such a company can't be deleted or moved, or later refunds and
+     * cancellations would go to the wrong pool or nowhere.
+     */
+    public function hasCreditActivity(int $companyId): bool
+    {
+        $connection = $this->getConnection();
+        $balance = (float)$connection->fetchOne(
+            $connection->select()
+                ->from($this->getMainTable(), CompanyInterface::CREDIT_BALANCE)
+                ->where(CompanyInterface::ENTITY_ID . ' = ?', $companyId)
+        );
+        if (abs($balance) >= 0.00005) {
+            return true;
+        }
+        if ($connection->fetchOne(
+            $connection->select()
+                ->from($this->getTable(CreditHistory::TABLE), new \Zend_Db_Expr('1'))
+                ->where('company_id = ?', $companyId)
+                ->limit(1)
+        )) {
+            return true;
+        }
+
+        return (bool)$connection->fetchOne(
+            $connection->select()
+                ->from(['o' => $this->getTable('sales_order')], new \Zend_Db_Expr('1'))
+                ->join(['p' => $this->getTable('sales_order_payment')], 'p.parent_id = o.entity_id', [])
+                ->where('o.company_id IN (?)', $this->getSubtreeIds($companyId))
+                ->where('p.method = ?', StoreCreditFacade::CODE)
+                ->limit(1)
+        );
     }
 
     /**

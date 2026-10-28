@@ -34,6 +34,7 @@ $pool = $block->getPoolCompany();
             </div>
         </div>
 
+        <?php if ($block->canAdjust()): ?>
         <form action="<?= $escaper->escapeUrl($block->getAdjustUrl()) ?>" method="post">
             <?= $block->getBlockHtml('formkey') ?>
             <fieldset class="admin__fieldset">
@@ -87,6 +88,7 @@ $pool = $block->getPoolCompany();
                 </div>
             </fieldset>
         </form>
+        <?php endif; ?>
     </div>
 
     <?php $history = $block->getHistory(); ?>

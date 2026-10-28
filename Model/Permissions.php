@@ -26,6 +26,8 @@ class Permissions
     public const CHILDREN_MANAGE = 'children_manage';
     public const ORDERS_VIEW_COMPANY = 'orders_view_company';
     public const CREDIT_VIEW = 'credit_view';
+    // The planned "place_order", narrowed to what is shared: members still check out with their own card.
+    public const CREDIT_USE = 'credit_use';
 
     /**
      * The one permission a company member always has: without it they could not see the company
@@ -43,6 +45,7 @@ class Permissions
         self::USERS_MANAGE => self::USERS_VIEW,
         self::ROLES_MANAGE => self::ROLES_VIEW,
         self::CHILDREN_MANAGE => self::CHILDREN_VIEW,
+        self::CREDIT_USE => self::CREDIT_VIEW,
     ];
 
     /**
@@ -74,6 +77,7 @@ class Permissions
             ],
             (string)__('Store Credit') => [
                 self::CREDIT_VIEW => __('See the store credit balance and history'),
+                self::CREDIT_USE => __('Pay with the company\'s store credit'),
             ],
         ];
     }

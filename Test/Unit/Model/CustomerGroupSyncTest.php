@@ -5,6 +5,7 @@ namespace Tonyapps\B2b\Test\Unit\Model;
 
 use Magento\Customer\Api\Data\GroupInterface;
 use Magento\Customer\Api\GroupManagementInterface;
+use Magento\Customer\Model\Customer\NotificationStorage;
 use Magento\Customer\Model\Indexer\Processor as CustomerIndexer;
 use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\DB\Adapter\AdapterInterface;
@@ -28,6 +29,8 @@ class CustomerGroupSyncTest extends TestCase
     private SettingResolver&MockObject $settingResolver;
     private CustomerIndexer&MockObject $customerIndexer;
     private CustomerGroupSync $sync;
+    private NotificationStorage&MockObject $notificationStorage;
+    private int $currentGroupId = 0;
 
     /**
      * @var array<int, array{ids: int[], groupId: int}>
@@ -48,6 +51,7 @@ class CustomerGroupSyncTest extends TestCase
         $this->companyCustomer = $this->createMock(CompanyCustomer::class);
         $this->settingResolver = $this->createMock(SettingResolver::class);
         $this->customerIndexer = $this->createMock(CustomerIndexer::class);
+        $this->notificationStorage = $this->createMock(NotificationStorage::class);
 
         $select = $this->createMock(Select::class);
         $select->method('from')->willReturnSelf();
@@ -61,6 +65,7 @@ class CustomerGroupSyncTest extends TestCase
             }
         );
         $this->connection->method('select')->willReturn($select);
+        $this->connection->method('fetchOne')->willReturnCallback(fn(): int => $this->currentGroupId);
         // Every customer applyGroup looks at is treated as not being in the target group yet.
         $this->connection->method('fetchCol')->willReturnCallback(
             fn(): array => $this->selectedCustomerIds
@@ -91,7 +96,8 @@ class CustomerGroupSyncTest extends TestCase
             $this->companyCustomer,
             $this->settingResolver,
             $groupManagement,
-            $this->customerIndexer
+            $this->customerIndexer,
+            $this->notificationStorage
         );
     }
 
@@ -195,7 +201,7 @@ class CustomerGroupSyncTest extends TestCase
     public function testJoiningAnActiveCompanyAppliesItsGroup(): void
     {
         $this->companyResource->method('getPathById')->willReturn('1/4');
-        $this->companyResource->method('getStatusById')->willReturn(CompanyInterface::STATUS_ACTIVE);
+        $this->companyResource->method('isActivePath')->willReturn(true);
         $this->settingResolver->method('resolveCustomerGroupId')->willReturn(5);
 
         $this->sync->syncCustomer(7, 4);
@@ -206,7 +212,7 @@ class CustomerGroupSyncTest extends TestCase
     public function testJoiningACompanyAwaitingApprovalDoesNotGrantItsGroup(): void
     {
         $this->companyResource->method('getPathById')->willReturn('1/4');
-        $this->companyResource->method('getStatusById')->willReturn(CompanyInterface::STATUS_PENDING);
+        $this->companyResource->method('isActivePath')->willReturn(false);
         $this->settingResolver->method('resolveCustomerGroupId')->willReturn(5);
 
         $this->sync->syncCustomer(7, 4);
@@ -214,11 +220,59 @@ class CustomerGroupSyncTest extends TestCase
         self::assertSame([['ids' => [7], 'groupId' => 1]], $this->updates);
     }
 
-    public function testLeavingACompanyPutsTheCustomerBackInTheDefaultGroup(): void
+    public function testLeavingACompanyTakesBackTheGroupItGave(): void
     {
-        $this->sync->syncCustomer(7, null);
+        $this->companyResource->method('getPathById')->willReturn('1/4');
+        $this->settingResolver->method('resolveCustomerGroupId')->willReturn(5);
+        $this->currentGroupId = 5;
+
+        $this->sync->syncCustomer(7, null, 4);
 
         self::assertSame([['ids' => [7], 'groupId' => 1]], $this->updates);
+    }
+
+    public function testLeavingACompanyKeepsAGroupSetByHand(): void
+    {
+        $this->companyResource->method('getPathById')->willReturn('1/4');
+        $this->settingResolver->method('resolveCustomerGroupId')->willReturn(5);
+        $this->currentGroupId = 3; // an administrator moved them to "Retailer" by hand
+
+        $this->sync->syncCustomer(7, null, 4);
+
+        self::assertSame([], $this->updates);
+    }
+
+    public function testLeavingACompanyThatGaveNoGroupLeavesTheCustomerAlone(): void
+    {
+        $this->companyResource->method('getPathById')->willReturn('1/4');
+        $this->settingResolver->method('resolveCustomerGroupId')->willReturn(null);
+        $this->currentGroupId = 3;
+
+        $this->sync->syncCustomer(7, null, 4);
+
+        self::assertSame([], $this->updates);
+    }
+
+    public function testMovingToACompanyWithNoGroupDropsTheOldCompanysPricing(): void
+    {
+        $this->companyResource->method('getPathById')->willReturnMap([[4, '1/4'], [8, '8']]);
+        $this->settingResolver->method('resolveCustomerGroupId')->willReturnMap([['1/4', 5], ['8', null]]);
+        $this->currentGroupId = 5;
+
+        $this->sync->syncCustomer(7, 8, 4);
+
+        self::assertSame([['ids' => [7], 'groupId' => 1]], $this->updates);
+    }
+
+    public function testChangedCustomersGetTheirSessionRefreshed(): void
+    {
+        $this->companyResource->method('getPathById')->willReturn('1/4');
+        $this->companyResource->method('isActivePath')->willReturn(true);
+        $this->settingResolver->method('resolveCustomerGroupId')->willReturn(5);
+        $this->notificationStorage->expects(self::once())->method('add')
+            ->with(NotificationStorage::UPDATE_CUSTOMER_SESSION, 7);
+
+        $this->sync->syncCustomer(7, 4);
     }
 
     public function testDeletingACompanyThatManagedNoGroupLeavesItsMembersAlone(): void
@@ -232,5 +286,21 @@ class CustomerGroupSyncTest extends TestCase
         $this->sync->releaseCompanyTree(1);
 
         self::assertSame([], $this->updates);
+    }
+
+    public function testAnActiveCompanyUnderABlockedParentConfersNoGroup(): void
+    {
+        // Re-syncing child 4 alone: its own row is active, but parent 1 above the subtree is blocked.
+        $this->companyResource->method('getSubtree')->with(4)->willReturn([
+            4 => ['path' => '1/4', 'status' => CompanyInterface::STATUS_ACTIVE],
+        ]);
+        $this->companyResource->expects(self::once())->method('getStatusesByIds')->with([1])
+            ->willReturn([1 => CompanyInterface::STATUS_BLOCKED]);
+        $this->settingResolver->method('resolveCustomerGroupIds')->willReturn([4 => 5]);
+        $this->companyCustomer->method('getMemberIds')->willReturn([300]);
+
+        $this->sync->syncCompanyTree(4);
+
+        self::assertSame([['ids' => [300], 'groupId' => 1]], $this->updates);
     }
 }

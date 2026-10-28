@@ -48,7 +48,8 @@ class Role extends AbstractCompanyAction implements HttpPostActionInterface
             $this->userManagement->setUserRole(
                 $company,
                 (int)$this->request->getParam('customer_id'),
-                (int)$this->request->getParam('role_id') ?: null
+                (int)$this->request->getParam('role_id') ?: null,
+                $this->companyContext->getCustomerId()
             );
             $this->messageManager->addSuccessMessage(__('The role has been changed.'));
         } catch (LocalizedException $exception) {

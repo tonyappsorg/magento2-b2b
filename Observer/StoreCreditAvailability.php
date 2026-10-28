@@ -4,12 +4,17 @@ declare(strict_types=1);
 namespace Tonyapps\B2b\Observer;
 
 use Magento\Customer\Model\Session as CustomerSession;
+use Magento\Framework\App\Area;
+use Magento\Framework\App\State;
 use Magento\Framework\Event\Observer;
 use Magento\Framework\Event\ObserverInterface;
 use Tonyapps\B2b\Api\CompanyRepositoryInterface;
-use Tonyapps\B2b\Api\Data\CompanyInterface;
+use Tonyapps\B2b\Model\ResourceModel\Company as CompanyResource;
 use Tonyapps\B2b\Api\MembershipManagementInterface;
+use Tonyapps\B2b\Model\Config;
 use Tonyapps\B2b\Model\Payment\StoreCreditFacade;
+use Tonyapps\B2b\Model\PermissionChecker;
+use Tonyapps\B2b\Model\Permissions;
 use Tonyapps\B2b\Model\StoreCredit;
 
 /**
@@ -25,7 +30,11 @@ class StoreCreditAvailability implements ObserverInterface
         private readonly StoreCredit $storeCredit,
         private readonly MembershipManagementInterface $membership,
         private readonly CompanyRepositoryInterface $companyRepository,
-        private readonly CustomerSession $customerSession
+        private readonly CustomerSession $customerSession,
+        private readonly CompanyResource $companyResource,
+        private readonly Config $config,
+        private readonly PermissionChecker $permissionChecker,
+        private readonly State $appState
     ) {
     }
 
@@ -52,7 +61,7 @@ class StoreCreditAvailability implements ObserverInterface
             ? (int)$quote->getCustomerId()
             : (int)$this->customerSession->getCustomerId();
 
-        if (!$customerId) {
+        if (!$customerId || !$this->config->isEnabled()) {
             return false;
         }
 
@@ -67,7 +76,16 @@ class StoreCreditAvailability implements ObserverInterface
             return false;
         }
 
-        if ($company->getStatus() !== CompanyInterface::STATUS_ACTIVE) {
+        // The pool belongs to the root; a blocked company anywhere above this one switches it off.
+        if (!$this->companyResource->isActivePath((int)$company->getId())) {
+            return false;
+        }
+
+        // Spending the shared pool is a company permission; an administrator creating the order in the admin
+        // has already decided. Core re-checks availability when the order is placed, so this also guards the API.
+        if ($this->appState->getAreaCode() !== Area::AREA_ADMINHTML
+            && !$this->permissionChecker->isAllowed($customerId, $company, Permissions::CREDIT_USE)
+        ) {
             return false;
         }
 

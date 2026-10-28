@@ -5,7 +5,9 @@
         <resources>
             <resource id="Magento_Backend::admin">
                 <resource id="Magento_Customer::customer">
-                    <resource id="Tonyapps_B2b::companies" title="Companies" sortOrder="50"/>
+                    <resource id="Tonyapps_B2b::companies" title="Companies" sortOrder="50">
+                        <resource id="Tonyapps_B2b::credit" title="Adjust Store Credit" sortOrder="10"/>
+                    </resource>
                 </resource>
                 <resource id="Magento_Backend::stores">
                     <resource id="Magento_Backend::stores_settings">
