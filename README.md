@@ -116,6 +116,7 @@ company
 ├── children_view / children_manage
 ├── orders_view_own / orders_view_company   (company_* includes descendants)
 ├── credit_view
+├── requisition_lists_view / requisition_lists_manage
 └── place_order                              (a view-only role cannot check out)
 ```
 

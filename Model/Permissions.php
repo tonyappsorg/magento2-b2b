@@ -28,6 +28,8 @@ class Permissions
     public const CREDIT_VIEW = 'credit_view';
     // The planned "place_order", narrowed to what is shared: members still check out with their own card.
     public const CREDIT_USE = 'credit_use';
+    public const REQUISITION_LISTS_VIEW = 'requisition_lists_view';
+    public const REQUISITION_LISTS_MANAGE = 'requisition_lists_manage';
 
     /**
      * The one permission a company member always has: without it they could not see the company
@@ -46,6 +48,7 @@ class Permissions
         self::ROLES_MANAGE => self::ROLES_VIEW,
         self::CHILDREN_MANAGE => self::CHILDREN_VIEW,
         self::CREDIT_USE => self::CREDIT_VIEW,
+        self::REQUISITION_LISTS_MANAGE => self::REQUISITION_LISTS_VIEW,
     ];
 
     /**
@@ -78,6 +81,10 @@ class Permissions
             (string)__('Store Credit') => [
                 self::CREDIT_VIEW => __('See the store credit balance and history'),
                 self::CREDIT_USE => __('Pay with the company\'s store credit'),
+            ],
+            (string)__('Requisition Lists') => [
+                self::REQUISITION_LISTS_VIEW => __('View and add company requisition lists to the cart'),
+                self::REQUISITION_LISTS_MANAGE => __('Create, edit, and delete company requisition lists'),
             ],
         ];
     }

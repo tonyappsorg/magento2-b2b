@@ -71,4 +71,12 @@ class PermissionsTest extends TestCase
         self::assertTrue($this->permissions->exists(Permissions::USERS_MANAGE));
         self::assertFalse($this->permissions->exists('users_destroy'));
     }
+
+    public function testRequisitionListManagePermissionImpliesView(): void
+    {
+        self::assertSame(
+            [Permissions::REQUISITION_LISTS_VIEW, Permissions::REQUISITION_LISTS_MANAGE],
+            $this->permissions->normalise([Permissions::REQUISITION_LISTS_MANAGE])
+        );
+    }
 }
