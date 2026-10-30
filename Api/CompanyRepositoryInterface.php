@@ -3,8 +3,6 @@ declare(strict_types=1);
 
 namespace Tonyapps\B2b\Api;
 
-use Magento\Framework\Api\SearchCriteriaInterface;
-use Magento\Framework\Api\SearchResultsInterface;
 use Tonyapps\B2b\Api\Data\CompanyInterface;
 
 interface CompanyRepositoryInterface
@@ -17,5 +15,4 @@ interface CompanyRepositoryInterface
 
     public function deleteById(int $companyId): bool;
 
-    public function getList(SearchCriteriaInterface $searchCriteria): SearchResultsInterface;
 }

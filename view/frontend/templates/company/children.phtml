@@ -150,8 +150,7 @@ $fields = [
                     form = $('#company-child-form'),
                     title = $('#child-form-title'),
                     cancel = $('#child-form-reset'),
-                    fields = ['name', 'legal_name', 'vat_tax_id', 'email', 'telephone',
-                              'street', 'city', 'region', 'postcode', 'country_id'];
+                    fields = <?= /* @noEscape */ json_encode(\Tonyapps\B2b\Api\Data\CompanyInterface::CUSTOMER_EDITABLE_FIELDS) ?>;
 
                 function fill(child) {
                     $('#child_entity_id').val(child ? child.entity_id : '');

@@ -49,7 +49,7 @@ abstract class AbstractCompanyAction implements ActionInterface
         }
 
         if ($this->companyContext->getCustomerId() === null) {
-            $this->customerSession->setAfterAuthUrl($this->url->getUrl($this->getCurrentPath()));
+            $this->customerSession->setAfterAuthUrl($this->url->getUrl('*/*/*'));
 
             return $this->redirect('customer/account/login');
         }
@@ -83,19 +83,4 @@ abstract class AbstractCompanyAction implements ActionInterface
         return $redirect->setPath($path);
     }
 
-    /**
-     * Path to come back to after logging in.
-     */
-    private function getCurrentPath(): string
-    {
-        return trim(
-            sprintf(
-                '%s/%s/%s',
-                $this->request->getModuleName() ?: 'b2b',
-                $this->request->getControllerName() ?: 'company',
-                $this->request->getActionName() ?: 'index'
-            ),
-            '/'
-        );
-    }
 }

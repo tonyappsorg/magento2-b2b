@@ -192,13 +192,4 @@ class PermissionCheckerTest extends TestCase
         $this->checker->getPermissions(7, $this->company());
     }
 
-    public function testResettingForgetsTheCachedAnswer(): void
-    {
-        $this->companyCustomer->expects(self::exactly(2))->method('getRoleId')->willReturn(null);
-        $this->roleRepository->method('getDefaultForCompany')->willReturn(null);
-
-        $this->checker->getPermissions(7, $this->company());
-        $this->checker->reset();
-        $this->checker->getPermissions(7, $this->company());
-    }
 }

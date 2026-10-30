@@ -44,7 +44,7 @@ class SettingResolver
     {
         $exploded = array_map([$this, 'explodePath'], $paths);
         $ancestorIds = $exploded ? array_values(array_unique(array_merge(...array_values($exploded)))) : [];
-        $groupIds = $this->companyResource->getGroupIdsByPath($ancestorIds);
+        $groupIds = $this->companyResource->getColumnByIds(CompanyInterface::CUSTOMER_GROUP_ID, $ancestorIds);
 
         $resolved = [];
         foreach ($exploded as $key => $pathIds) {
@@ -78,7 +78,7 @@ class SettingResolver
             return null;
         }
 
-        $modes = $this->companyResource->getPaymentModesByPath($pathIds);
+        $modes = $this->companyResource->getColumnByIds(CompanyInterface::PAYMENT_MODE, $pathIds);
 
         foreach (array_reverse($pathIds) as $companyId) {
             $mode = $modes[$companyId] ?? CompanyInterface::PAYMENT_MODE_INHERIT;

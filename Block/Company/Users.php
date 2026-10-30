@@ -12,6 +12,7 @@ use Tonyapps\B2b\Api\RoleRepositoryInterface;
 use Tonyapps\B2b\Model\CompanyContext;
 use Tonyapps\B2b\Model\CompanyUserManagement;
 use Tonyapps\B2b\Model\Permissions;
+use Tonyapps\B2b\Model\ResourceModel\CompanyCustomer;
 
 /**
  * The company's user list and the add-user form.
@@ -27,6 +28,7 @@ class Users extends Template
         Context $context,
         private readonly CompanyContext $companyContext,
         private readonly CompanyUserManagement $userManagement,
+        private readonly CompanyCustomer $companyCustomer,
         private readonly RoleRepositoryInterface $roleRepository,
         array $data = []
     ) {
@@ -71,7 +73,7 @@ class Users extends Template
     public function getRoleId(CustomerInterface $customer): ?int
     {
         // One query for the whole list instead of one per row.
-        $this->roleIds ??= $this->userManagement->getRoleIds(
+        $this->roleIds ??= $this->companyCustomer->getRoleIds(
             array_map(static fn(CustomerInterface $user): int => (int)$user->getId(), $this->getUsers())
         );
 

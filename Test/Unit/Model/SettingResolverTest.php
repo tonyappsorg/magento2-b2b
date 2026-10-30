@@ -32,35 +32,35 @@ class SettingResolverTest extends TestCase
 
     public function testCompanyOwnGroupWinsOverItsAncestors(): void
     {
-        $this->companyResource->method('getGroupIdsByPath')->willReturn([1 => 2, 4 => 3, 9 => 7]);
+        $this->companyResource->method('getColumnByIds')->willReturn([1 => 2, 4 => 3, 9 => 7]);
 
         self::assertSame(7, $this->resolver->resolveCustomerGroupId('1/4/9'));
     }
 
     public function testNearestAncestorWinsWhenTheCompanyInherits(): void
     {
-        $this->companyResource->method('getGroupIdsByPath')->willReturn([1 => 2, 4 => 3, 9 => null]);
+        $this->companyResource->method('getColumnByIds')->willReturn([1 => 2, 4 => 3, 9 => null]);
 
         self::assertSame(3, $this->resolver->resolveCustomerGroupId('1/4/9'));
     }
 
     public function testFallsBackToTheRootWhenEveryIntermediateInherits(): void
     {
-        $this->companyResource->method('getGroupIdsByPath')->willReturn([1 => 2, 4 => null, 9 => null]);
+        $this->companyResource->method('getColumnByIds')->willReturn([1 => 2, 4 => null, 9 => null]);
 
         self::assertSame(2, $this->resolver->resolveCustomerGroupId('1/4/9'));
     }
 
     public function testReturnsNullWhenNoCompanyOnThePathSetsAGroup(): void
     {
-        $this->companyResource->method('getGroupIdsByPath')->willReturn([1 => null, 4 => null]);
+        $this->companyResource->method('getColumnByIds')->willReturn([1 => null, 4 => null]);
 
         self::assertNull($this->resolver->resolveCustomerGroupId('1/4'));
     }
 
     public function testReturnsNullForAnEmptyPathWithoutQuerying(): void
     {
-        $this->companyResource->expects(self::once())->method('getGroupIdsByPath')->with([])->willReturn([]);
+        $this->companyResource->expects(self::once())->method('getColumnByIds')->with(CompanyInterface::CUSTOMER_GROUP_ID, [])->willReturn([]);
 
         self::assertNull($this->resolver->resolveCustomerGroupId(null));
     }
@@ -69,8 +69,8 @@ class SettingResolverTest extends TestCase
     {
         // Root 1 (group 2) -> child 4 (own group 3) -> grandchild 9 (inherits 3); sibling 5 inherits 2.
         $this->companyResource->expects(self::once())
-            ->method('getGroupIdsByPath')
-            ->with([1, 4, 9, 5])
+            ->method('getColumnByIds')
+            ->with(CompanyInterface::CUSTOMER_GROUP_ID, [1, 4, 9, 5])
             ->willReturn([1 => 2, 4 => 3, 9 => null, 5 => null]);
 
         $resolved = $this->resolver->resolveCustomerGroupIds([
@@ -128,7 +128,7 @@ class SettingResolverTest extends TestCase
     public function testPaymentInheritKeepsWalkingUpwards(): void
     {
         // Child and grandchild inherit; the root restricts, so the root's list applies.
-        $this->companyResource->method('getPaymentModesByPath')->willReturn([
+        $this->companyResource->method('getColumnByIds')->willReturn([
             1 => CompanyInterface::PAYMENT_MODE_RESTRICT,
             4 => CompanyInterface::PAYMENT_MODE_INHERIT,
             9 => CompanyInterface::PAYMENT_MODE_INHERIT,
@@ -142,7 +142,7 @@ class SettingResolverTest extends TestCase
     public function testAllowEveryMethodStopsTheWalk(): void
     {
         // The child opts out of the root's restriction, so nothing below it is restricted either.
-        $this->companyResource->method('getPaymentModesByPath')->willReturn([
+        $this->companyResource->method('getColumnByIds')->willReturn([
             1 => CompanyInterface::PAYMENT_MODE_RESTRICT,
             4 => CompanyInterface::PAYMENT_MODE_ALL,
             9 => CompanyInterface::PAYMENT_MODE_INHERIT,
@@ -154,7 +154,7 @@ class SettingResolverTest extends TestCase
 
     public function testACompanysOwnRestrictionWinsOverItsAncestors(): void
     {
-        $this->companyResource->method('getPaymentModesByPath')->willReturn([
+        $this->companyResource->method('getColumnByIds')->willReturn([
             1 => CompanyInterface::PAYMENT_MODE_RESTRICT,
             9 => CompanyInterface::PAYMENT_MODE_RESTRICT,
         ]);
@@ -166,7 +166,7 @@ class SettingResolverTest extends TestCase
 
     public function testNobodyDecidingMeansNoRestriction(): void
     {
-        $this->companyResource->method('getPaymentModesByPath')->willReturn([
+        $this->companyResource->method('getColumnByIds')->willReturn([
             1 => CompanyInterface::PAYMENT_MODE_INHERIT,
             9 => CompanyInterface::PAYMENT_MODE_INHERIT,
         ]);
@@ -177,7 +177,7 @@ class SettingResolverTest extends TestCase
     public function testRestrictingToAnEmptyListIsKeptAsAnEmptyList(): void
     {
         // Distinct from NULL: this company may use nothing, rather than anything.
-        $this->companyResource->method('getPaymentModesByPath')
+        $this->companyResource->method('getColumnByIds')
             ->willReturn([1 => CompanyInterface::PAYMENT_MODE_RESTRICT]);
         $this->companyPayment->method('getMethodCodes')->willReturn([]);
 
@@ -186,7 +186,7 @@ class SettingResolverTest extends TestCase
 
     public function testBatchIgnoresGarbageSegments(): void
     {
-        $this->companyResource->method('getGroupIdsByPath')->willReturn([4 => 6]);
+        $this->companyResource->method('getColumnByIds')->willReturn([4 => 6]);
 
         self::assertSame([0 => 6], $this->resolver->resolveCustomerGroupIds(['0//4']));
     }

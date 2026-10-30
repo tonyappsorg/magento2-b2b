@@ -3,10 +3,6 @@ declare(strict_types=1);
 
 namespace Tonyapps\B2b\Model;
 
-use Magento\Framework\Api\SearchCriteria\CollectionProcessorInterface;
-use Magento\Framework\Api\SearchCriteriaInterface;
-use Magento\Framework\Api\SearchResultsInterface;
-use Magento\Framework\Api\SearchResultsInterfaceFactory;
 use Magento\Framework\Exception\CouldNotDeleteException;
 use Magento\Framework\Exception\CouldNotSaveException;
 use Magento\Framework\Exception\NoSuchEntityException;
@@ -22,8 +18,6 @@ class RoleRepository implements RoleRepositoryInterface
         private readonly RoleResource $resource,
         private readonly RoleFactory $roleFactory,
         private readonly CollectionFactory $collectionFactory,
-        private readonly SearchResultsInterfaceFactory $searchResultsFactory,
-        private readonly CollectionProcessorInterface $collectionProcessor,
         private readonly Permissions $permissions,
         private readonly CompanyResource $companyResource,
         private readonly SettingResolver $settingResolver
@@ -102,25 +96,6 @@ class RoleRepository implements RoleRepositoryInterface
         }
 
         return true;
-    }
-
-    public function deleteById(int $roleId): bool
-    {
-        return $this->delete($this->getById($roleId));
-    }
-
-    public function getList(SearchCriteriaInterface $searchCriteria): SearchResultsInterface
-    {
-        $collection = $this->collectionFactory->create();
-        $this->collectionProcessor->process($searchCriteria, $collection);
-
-        /** @var SearchResultsInterface $searchResults */
-        $searchResults = $this->searchResultsFactory->create();
-        $searchResults->setSearchCriteria($searchCriteria);
-        $searchResults->setItems($collection->getItems());
-        $searchResults->setTotalCount($collection->getSize());
-
-        return $searchResults;
     }
 
     public function getByCompanyId(int $companyId): array

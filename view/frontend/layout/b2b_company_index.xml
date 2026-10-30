@@ -2,6 +2,7 @@
 <page layout="2columns-left" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
       xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
     <update handle="customer_account"/>
+    <head><title translate="true">My Company</title></head>
     <body>
         <referenceContainer name="content">
             <block class="Tonyapps\B2b\Block\Company\Dashboard" name="tonyapps_b2b.company.dashboard"

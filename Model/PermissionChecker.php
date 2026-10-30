@@ -108,11 +108,4 @@ class PermissionChecker
         return $this->roleRepository->getDefaultForCompany($companyId);
     }
 
-    /**
-     * Forget what has been worked out so far — for a process that changes roles and keeps going.
-     */
-    public function reset(): void
-    {
-        $this->cache = [];
-    }
 }

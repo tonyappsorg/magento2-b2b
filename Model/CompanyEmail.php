@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Tonyapps\B2b\Model;
 
 use Magento\Customer\Api\CustomerRepositoryInterface;
+use Magento\Customer\Api\CustomerNameGenerationInterface;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\Mail\Template\TransportBuilder;
 use Magento\Framework\Translate\Inline\StateInterface;
@@ -33,6 +34,7 @@ class CompanyEmail
         private readonly StateInterface $inlineTranslation,
         private readonly Config $config,
         private readonly CustomerRepositoryInterface $customerRepository,
+        private readonly CustomerNameGenerationInterface $customerNameGeneration,
         private readonly UrlInterface $urlBuilder,
         private readonly LoggerInterface $logger
     ) {
@@ -66,26 +68,15 @@ class CompanyEmail
 
     public function sendApproved(CompanyInterface $company): void
     {
-        $store = $this->getStore();
-        $admin = $this->getAdminName($company);
-        if ($admin['email'] === '') {
-            return;
-        }
-
-        $this->send(
-            $this->config->getApprovedTemplate((int)$store->getId()),
-            $admin['email'],
-            $admin['name'],
-            $store,
-            [
-                'company_name' => (string)$company->getName(),
-                'admin_name' => $admin['name'],
-                'company_url' => $store->getUrl('b2b/company/index'),
-            ]
-        );
+        $this->sendDecision($company, true);
     }
 
     public function sendRejected(CompanyInterface $company): void
+    {
+        $this->sendDecision($company, false);
+    }
+
+    private function sendDecision(CompanyInterface $company, bool $approved): void
     {
         $store = $this->getStore();
         $admin = $this->getAdminName($company);
@@ -93,15 +84,22 @@ class CompanyEmail
             return;
         }
 
+        $templateVars = [
+            'company_name' => (string)$company->getName(),
+            'admin_name' => $admin['name'],
+        ];
+        if ($approved) {
+            $templateVars['company_url'] = $store->getUrl('b2b/company/index');
+        }
+
         $this->send(
-            $this->config->getRejectedTemplate((int)$store->getId()),
+            $approved
+                ? $this->config->getApprovedTemplate((int)$store->getId())
+                : $this->config->getRejectedTemplate((int)$store->getId()),
             $admin['email'],
             $admin['name'],
             $store,
-            [
-                'company_name' => (string)$company->getName(),
-                'admin_name' => $admin['name'],
-            ]
+            $templateVars
         );
     }
 
@@ -160,7 +158,7 @@ class CompanyEmail
         }
 
         return [
-            'name' => trim($customer->getFirstname() . ' ' . $customer->getLastname()),
+            'name' => $this->customerNameGeneration->getCustomerName($customer),
             'email' => (string)$customer->getEmail(),
         ];
     }

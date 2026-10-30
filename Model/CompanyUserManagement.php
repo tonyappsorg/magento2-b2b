@@ -155,17 +155,6 @@ class CompanyUserManagement
     }
 
     /**
-     * The role each member currently holds, keyed by customer ID; absent means the company default.
-     *
-     * @param int[] $customerIds
-     * @return array<int, int>
-     */
-    public function getRoleIds(array $customerIds): array
-    {
-        return $this->companyCustomer->getRoleIds(array_map('intval', $customerIds));
-    }
-
-    /**
      * Refuse a role belonging to somebody else's company.
      *
      * @throws LocalizedException

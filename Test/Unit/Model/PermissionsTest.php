@@ -66,10 +66,16 @@ class PermissionsTest extends TestCase
         self::assertSame($grouped, $this->permissions->getAll());
     }
 
-    public function testExistsRecognisesOnlyRealPermissions(): void
+    public function testLabelsFlattensGroupedPermissionLabels(): void
     {
-        self::assertTrue($this->permissions->exists(Permissions::USERS_MANAGE));
-        self::assertFalse($this->permissions->exists('users_destroy'));
+        $grouped = [];
+        foreach ($this->permissions->getGrouped() as $group) {
+            foreach ($group as $permission => $label) {
+                $grouped[$permission] = (string)$label;
+            }
+        }
+
+        self::assertSame($grouped, $this->permissions->getLabels());
     }
 
     public function testRequisitionListManagePermissionImpliesView(): void

@@ -3,8 +3,6 @@ declare(strict_types=1);
 
 namespace Tonyapps\B2b\Test\Unit\Model;
 
-use Magento\Framework\Api\SearchCriteria\CollectionProcessorInterface;
-use Magento\Framework\Api\SearchResultsInterfaceFactory;
 use Magento\Framework\Exception\CouldNotDeleteException;
 use Magento\Framework\Exception\CouldNotSaveException;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -31,8 +29,6 @@ class RoleRepositoryTest extends TestCase
             $this->resource,
             $this->createMock(RoleFactory::class),
             $this->createMock(CollectionFactory::class),
-            $this->createMock(SearchResultsInterfaceFactory::class),
-            $this->createMock(CollectionProcessorInterface::class),
             new Permissions(),
             $this->createMock(CompanyResource::class),
             $this->createMock(SettingResolver::class)

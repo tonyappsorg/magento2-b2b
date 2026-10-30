@@ -97,9 +97,19 @@ class Permissions
         return array_merge(...array_map('array_keys', array_values($this->getGrouped())));
     }
 
-    public function exists(string $permission): bool
+    /**
+     * @return array<string, string>
+     */
+    public function getLabels(): array
     {
-        return in_array($permission, $this->getAll(), true);
+        $labels = [];
+        foreach ($this->getGrouped() as $group) {
+            foreach ($group as $permission => $label) {
+                $labels[$permission] = (string)$label;
+            }
+        }
+
+        return $labels;
     }
 
     /**

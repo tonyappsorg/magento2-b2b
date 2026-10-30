@@ -3,8 +3,6 @@ declare(strict_types=1);
 
 namespace Tonyapps\B2b\Api;
 
-use Magento\Framework\Api\SearchCriteriaInterface;
-use Magento\Framework\Api\SearchResultsInterface;
 use Tonyapps\B2b\Api\Data\RoleInterface;
 
 interface RoleRepositoryInterface
@@ -14,10 +12,6 @@ interface RoleRepositoryInterface
     public function getById(int $roleId): RoleInterface;
 
     public function delete(RoleInterface $role): bool;
-
-    public function deleteById(int $roleId): bool;
-
-    public function getList(SearchCriteriaInterface $searchCriteria): SearchResultsInterface;
 
     /**
      * Every role belonging to a company.

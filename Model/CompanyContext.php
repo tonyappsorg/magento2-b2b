@@ -12,9 +12,7 @@ use Tonyapps\B2b\Api\MembershipManagementInterface;
 /**
  * Who the current storefront visitor is, company-wise.
  *
- * Phase 1 of the permission model: the company administrator manages the company, everyone else
- * is only a member. Phase 3 replaces isCompanyAdmin() with a role and permission check; until
- * then nothing pretends to be finer-grained than it is.
+ * Resolves the current customer's company and checks company feature access.
  */
 class CompanyContext
 {
@@ -28,19 +26,6 @@ class CompanyContext
         private readonly Config $config,
         private readonly PermissionChecker $permissionChecker
     ) {
-    }
-
-    /**
-     * Forget the cached company.
-     *
-     * The company is resolved once per request, which is right for rendering a page but wrong for
-     * anything that changes membership and then keeps going in the same process.
-     */
-    public function reset(): void
-    {
-        $this->company = null;
-        $this->loaded = false;
-        $this->permissionChecker->reset();
     }
 
     public function getCustomerId(): ?int
@@ -75,18 +60,6 @@ class CompanyContext
     }
 
     /**
-     * Whether the visitor is the company's administrator, who may do everything.
-     */
-    public function isCompanyAdmin(): bool
-    {
-        $company = $this->getCompany();
-
-        return $company !== null
-            && $this->getCustomerId() !== null
-            && $company->getAdminCustomerId() === $this->getCustomerId();
-    }
-
-    /**
      * Whether the visitor holds a permission in their company.
      *
      * @see Permissions for the catalogue of permission names.
@@ -96,21 +69,6 @@ class CompanyContext
         // The master switch turns off everything the storefront gates on a permission.
         return $this->isEnabled()
             && $this->permissionChecker->isAllowed($this->getCustomerId(), $this->getCompany(), $permission);
-    }
-
-    /**
-     * Everything the visitor may do in their company.
-     *
-     * @return string[]
-     */
-    public function getPermissions(): array
-    {
-        $company = $this->getCompany();
-        $customerId = $this->getCustomerId();
-
-        return $company === null || $customerId === null || !$this->isEnabled()
-            ? []
-            : $this->permissionChecker->getPermissions($customerId, $company);
     }
 
     /**

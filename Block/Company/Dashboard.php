@@ -29,11 +29,6 @@ class Dashboard extends Template
         return $this->companyContext->getCompany();
     }
 
-    public function isCompanyAdmin(): bool
-    {
-        return $this->companyContext->isCompanyAdmin();
-    }
-
     public function canEditProfile(): bool
     {
         return $this->companyContext->isAllowed(Permissions::PROFILE_EDIT);
@@ -92,13 +87,9 @@ class Dashboard extends Template
     public function getStatusLabel(): string
     {
         $status = $this->getCompany()?->getStatus();
-        foreach ($this->statusSource->toOptionArray() as $option) {
-            if ($option['value'] === $status) {
-                return (string)$option['label'];
-            }
-        }
+        $labels = array_column($this->statusSource->toOptionArray(), 'label', 'value');
 
-        return '';
+        return (string)($labels[$status] ?? '');
     }
 
     /**

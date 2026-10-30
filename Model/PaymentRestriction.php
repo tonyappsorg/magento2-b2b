@@ -80,8 +80,4 @@ class PaymentRestriction
         return $this->settingResolver->resolvePaymentMethods($this->companyResource->getPathById($companyId));
     }
 
-    public function reset(): void
-    {
-        $this->cache = [];
-    }
 }

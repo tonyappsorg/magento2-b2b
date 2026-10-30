@@ -18,6 +18,18 @@ interface CompanyInterface
     public const EMAIL = 'email';
     public const TELEPHONE = 'telephone';
     public const STREET = 'street';
+    public const CUSTOMER_EDITABLE_FIELDS = [
+        self::NAME,
+        self::LEGAL_NAME,
+        self::VAT_TAX_ID,
+        self::EMAIL,
+        self::TELEPHONE,
+        self::STREET,
+        self::CITY,
+        self::REGION,
+        self::POSTCODE,
+        self::COUNTRY_ID,
+    ];
     public const CITY = 'city';
     public const REGION_ID = 'region_id';
     public const REGION = 'region';
@@ -51,9 +63,10 @@ interface CompanyInterface
 
     public function getId();
 
-    public function getParentId(): ?int;
-
     public function setParentId(?int $parentId): self;
+
+    /** @param array<string, mixed> $data */
+    public function applyCustomerData(array $data): self;
 
     /**
      * Materialized path of ancestor IDs ending with this company's own ID, e.g. "1/4/9".
@@ -82,8 +95,6 @@ interface CompanyInterface
 
     public function setStatus(int $status): self;
 
-    public function isActive(): bool;
-
     /**
      * Customer group set directly on this company; NULL means "inherit from the parent".
      */
@@ -96,9 +107,5 @@ interface CompanyInterface
     /**
      * How this company decides which payment methods its people may use.
      */
-    public function getPaymentMode(): int;
-
-    public function setPaymentMode(int $paymentMode): self;
-
     public function setAdminCustomerId(?int $customerId): self;
 }

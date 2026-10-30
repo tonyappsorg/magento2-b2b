@@ -26,26 +26,6 @@ class Save extends AbstractCompanyAction implements HttpPostActionInterface
 {
     protected string $requiredPermission = Permissions::PROFILE_EDIT;
 
-    /**
-     * What a company administrator may change about their own company.
-     *
-     * Deliberately excludes status, parent company, customer group and the administrator: those
-     * are the store's decisions, not the customer's, and letting the form post them would let a
-     * company approve itself or move itself into another company's tree.
-     */
-    private const EDITABLE_FIELDS = [
-        CompanyInterface::NAME,
-        CompanyInterface::LEGAL_NAME,
-        CompanyInterface::VAT_TAX_ID,
-        CompanyInterface::EMAIL,
-        CompanyInterface::TELEPHONE,
-        CompanyInterface::STREET,
-        CompanyInterface::CITY,
-        CompanyInterface::REGION,
-        CompanyInterface::POSTCODE,
-        CompanyInterface::COUNTRY_ID,
-    ];
-
     public function __construct(
         RequestInterface $request,
         ResultFactory $resultFactory,
@@ -74,17 +54,7 @@ class Save extends AbstractCompanyAction implements HttpPostActionInterface
             return $this->redirect('b2b/company/edit');
         }
 
-        foreach (self::EDITABLE_FIELDS as $field) {
-            if (!array_key_exists($field, $data)) {
-                continue;
-            }
-
-            $value = is_array($data[$field])
-                ? implode("\n", array_filter(array_map('trim', $data[$field])))
-                : trim((string)$data[$field]);
-            $company->setData($field, $value === '' ? null : $value);
-        }
-        $company->setData(CompanyInterface::NAME, $name);
+        $company->applyCustomerData($data);
 
         try {
             $this->companyRepository->save($company);

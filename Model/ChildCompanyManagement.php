@@ -20,23 +20,6 @@ use Tonyapps\B2b\Model\ResourceModel\Company\CollectionFactory as CompanyCollect
  */
 class ChildCompanyManagement
 {
-    /**
-     * What a parent company may set on a child. As everywhere on the storefront this is a
-     * whitelist: status, customer group, parent and administrator are not the customer's to choose.
-     */
-    private const EDITABLE_FIELDS = [
-        CompanyInterface::NAME,
-        CompanyInterface::LEGAL_NAME,
-        CompanyInterface::VAT_TAX_ID,
-        CompanyInterface::EMAIL,
-        CompanyInterface::TELEPHONE,
-        CompanyInterface::STREET,
-        CompanyInterface::CITY,
-        CompanyInterface::REGION,
-        CompanyInterface::POSTCODE,
-        CompanyInterface::COUNTRY_ID,
-    ];
-
     public function __construct(
         private readonly CompanyRepositoryInterface $companyRepository,
         private readonly CompanyFactory $companyFactory,
@@ -155,17 +138,6 @@ class ChildCompanyManagement
             throw new LocalizedException(__('Please enter a company name.'));
         }
 
-        foreach (self::EDITABLE_FIELDS as $field) {
-            if (!array_key_exists($field, $data)) {
-                continue;
-            }
-
-            $value = is_array($data[$field])
-                ? implode("\n", array_filter(array_map('trim', $data[$field])))
-                : trim((string)$data[$field]);
-            $company->setData($field, $value === '' ? null : $value);
-        }
-
-        $company->setData(CompanyInterface::NAME, $name);
+        $company->applyCustomerData($data);
     }
 }

@@ -20,13 +20,4 @@ class Collection extends AbstractCollection
         $this->_init(CompanyModel::class, CompanyResource::class);
     }
 
-    /**
-     * @return $this
-     */
-    public function addActiveFilter(): self
-    {
-        $this->addFieldToFilter(CompanyInterface::STATUS, CompanyInterface::STATUS_ACTIVE);
-
-        return $this;
-    }
 }

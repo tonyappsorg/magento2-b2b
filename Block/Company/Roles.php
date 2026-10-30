@@ -52,16 +52,12 @@ class Roles extends Template
 
     public function getPermissionLabels(RoleInterface $role): string
     {
-        $labels = [];
-        foreach ($this->permissions->getGrouped() as $group) {
-            foreach ($group as $permission => $label) {
-                if ($role->hasPermission($permission)) {
-                    $labels[] = (string)$label;
-                }
-            }
-        }
+        $labels = array_filter(
+            $this->permissions->getLabels(),
+            static fn(string $permission): bool => $role->hasPermission($permission)
+        );
 
-        return $labels ? implode(', ', $labels) : (string)__('Nothing beyond seeing the company');
+        return $labels ? implode(', ', array_values($labels)) : (string)__('Nothing beyond seeing the company');
     }
 
     public function getMemberCount(RoleInterface $role): int

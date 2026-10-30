@@ -4,13 +4,24 @@ declare(strict_types=1);
 namespace Tonyapps\B2b\Controller\Adminhtml\Company;
 
 use Magento\Framework\App\Action\HttpGetActionInterface;
+use Magento\Backend\App\Action\Context;
 use Magento\Framework\Controller\ResultFactory;
 use Magento\Framework\Controller\ResultInterface;
 use Magento\Framework\Exception\NoSuchEntityException;
+use Tonyapps\B2b\Api\CompanyRepositoryInterface;
 use Tonyapps\B2b\Api\Data\CompanyInterface;
+use Tonyapps\B2b\Model\CompanyFactory;
 
 class Edit extends AbstractCompany implements HttpGetActionInterface
 {
+    public function __construct(
+        Context $context,
+        CompanyRepositoryInterface $companyRepository,
+        private readonly CompanyFactory $companyFactory
+    ) {
+        parent::__construct($context, $companyRepository);
+    }
+
     public function execute(): ResultInterface
     {
         $companyId = (int)$this->getRequest()->getParam(CompanyInterface::ENTITY_ID);
@@ -29,8 +40,6 @@ class Edit extends AbstractCompany implements HttpGetActionInterface
         } else {
             $company = $this->companyFactory->create();
         }
-
-        $this->coreRegistry->register(self::REGISTRY_KEY, $company);
 
         /** @var \Magento\Backend\Model\View\Result\Page $result */
         $result = $this->resultFactory->create(ResultFactory::TYPE_PAGE);

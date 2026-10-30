@@ -76,12 +76,7 @@ class Form extends Template
      */
     public function getCountryOptions(): array
     {
-        $options = [];
-        foreach ($this->countryCollectionFactory->create()->loadByStore()->toOptionArray(false) as $country) {
-            $options[] = ['value' => (string)$country['value'], 'label' => (string)$country['label']];
-        }
-
-        return $options;
+        return $this->countryCollectionFactory->create()->loadByStore()->toOptionArray(false);
     }
 
     /**

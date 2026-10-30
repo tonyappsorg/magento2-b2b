@@ -180,7 +180,7 @@
             <formElements>
                 <multiselect>
                     <settings>
-                        <options class="Tonyapps\B2b\Model\Source\PaymentMethods"/>
+                        <options class="Magento\Payment\Model\Config\Source\Allmethods"/>
                         <size>10</size>
                     </settings>
                 </multiselect>

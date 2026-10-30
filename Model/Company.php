@@ -15,16 +15,28 @@ use Tonyapps\B2b\Api\Data\CompanyInterface;
  */
 class Company extends AbstractModel implements CompanyInterface
 {
+    /** @param array<string, mixed> $data */
+    public function applyCustomerData(array $data): CompanyInterface
+    {
+        foreach (CompanyInterface::CUSTOMER_EDITABLE_FIELDS as $field) {
+            if (!array_key_exists($field, $data)) {
+                continue;
+            }
+
+            $value = is_array($data[$field])
+                ? implode("\n", array_filter(array_map('trim', $data[$field])))
+                : trim((string)$data[$field]);
+            $this->setData($field, $value === '' ? null : $value);
+        }
+
+        $this->setData(CompanyInterface::NAME, trim((string)($data[CompanyInterface::NAME] ?? '')));
+
+        return $this;
+    }
+
     protected function _construct()
     {
         $this->_init(ResourceModel\Company::class);
-    }
-
-    public function getParentId(): ?int
-    {
-        $parentId = $this->getData(self::PARENT_ID);
-
-        return $parentId === null || $parentId === '' ? null : (int)$parentId;
     }
 
     public function setParentId(?int $parentId): CompanyInterface
@@ -78,11 +90,6 @@ class Company extends AbstractModel implements CompanyInterface
         return $this->setData(self::STATUS, $status);
     }
 
-    public function isActive(): bool
-    {
-        return $this->getStatus() === self::STATUS_ACTIVE;
-    }
-
     public function getCustomerGroupId(): ?int
     {
         $groupId = $this->getData(self::CUSTOMER_GROUP_ID);
@@ -105,16 +112,6 @@ class Company extends AbstractModel implements CompanyInterface
     public function setAdminCustomerId(?int $customerId): CompanyInterface
     {
         return $this->setData(self::ADMIN_CUSTOMER_ID, $customerId);
-    }
-
-    public function getPaymentMode(): int
-    {
-        return (int)$this->getData(self::PAYMENT_MODE);
-    }
-
-    public function setPaymentMode(int $paymentMode): CompanyInterface
-    {
-        return $this->setData(self::PAYMENT_MODE, $paymentMode);
     }
 
     /**

@@ -34,12 +34,7 @@ class RolePermissions extends Column
             return $dataSource;
         }
 
-        $labels = [];
-        foreach ($this->permissions->getGrouped() as $groupPermissions) {
-            foreach ($groupPermissions as $permission => $label) {
-                $labels[$permission] = (string)$label;
-            }
-        }
+        $labels = $this->permissions->getLabels();
 
         $name = $this->getData('name');
         foreach ($dataSource['data']['items'] as &$item) {

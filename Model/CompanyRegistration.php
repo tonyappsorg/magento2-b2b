@@ -16,23 +16,6 @@ use Tonyapps\B2b\Api\MembershipManagementInterface;
  */
 class CompanyRegistration
 {
-    /**
-     * Fields a customer is allowed to set on their own company. Everything else — status, parent,
-     * customer group, the administrator — is decided here or by an administrator.
-     */
-    private const ALLOWED_FIELDS = [
-        CompanyInterface::NAME,
-        CompanyInterface::LEGAL_NAME,
-        CompanyInterface::VAT_TAX_ID,
-        CompanyInterface::EMAIL,
-        CompanyInterface::TELEPHONE,
-        CompanyInterface::STREET,
-        CompanyInterface::CITY,
-        CompanyInterface::REGION,
-        CompanyInterface::POSTCODE,
-        CompanyInterface::COUNTRY_ID,
-    ];
-
     public function __construct(
         private readonly CompanyRepositoryInterface $companyRepository,
         private readonly CompanyFactory $companyFactory,
@@ -64,16 +47,7 @@ class CompanyRegistration
         }
 
         $company = $this->companyFactory->create();
-        foreach (self::ALLOWED_FIELDS as $field) {
-            if (isset($data[$field])) {
-                $value = is_array($data[$field])
-                    ? implode("\n", array_filter(array_map('trim', $data[$field])))
-                    : trim((string)$data[$field]);
-                $company->setData($field, $value === '' ? null : $value);
-            }
-        }
-
-        $company->setData(CompanyInterface::NAME, $name);
+        $company->applyCustomerData($data);
         $company->setStatus(CompanyInterface::STATUS_PENDING);
         $company->setAdminCustomerId($customerId);
         $company->setCustomerGroupId(null);

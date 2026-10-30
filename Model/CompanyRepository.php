@@ -3,26 +3,18 @@ declare(strict_types=1);
 
 namespace Tonyapps\B2b\Model;
 
-use Magento\Framework\Api\SearchCriteria\CollectionProcessorInterface;
-use Magento\Framework\Api\SearchCriteriaInterface;
-use Magento\Framework\Api\SearchResultsInterface;
-use Magento\Framework\Api\SearchResultsInterfaceFactory;
 use Magento\Framework\Exception\CouldNotDeleteException;
 use Magento\Framework\Exception\CouldNotSaveException;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Tonyapps\B2b\Api\CompanyRepositoryInterface;
 use Tonyapps\B2b\Api\Data\CompanyInterface;
 use Tonyapps\B2b\Model\ResourceModel\Company as CompanyResource;
-use Tonyapps\B2b\Model\ResourceModel\Company\CollectionFactory;
 
 class CompanyRepository implements CompanyRepositoryInterface
 {
     public function __construct(
         private readonly CompanyResource $resource,
         private readonly CompanyFactory $companyFactory,
-        private readonly CollectionFactory $collectionFactory,
-        private readonly SearchResultsInterfaceFactory $searchResultsFactory,
-        private readonly CollectionProcessorInterface $collectionProcessor,
         private readonly CustomerGroupSync $customerGroupSync
     ) {
     }
@@ -97,17 +89,4 @@ class CompanyRepository implements CompanyRepositoryInterface
         return $this->delete($this->getById($companyId));
     }
 
-    public function getList(SearchCriteriaInterface $searchCriteria): SearchResultsInterface
-    {
-        $collection = $this->collectionFactory->create();
-        $this->collectionProcessor->process($searchCriteria, $collection);
-
-        /** @var SearchResultsInterface $searchResults */
-        $searchResults = $this->searchResultsFactory->create();
-        $searchResults->setSearchCriteria($searchCriteria);
-        $searchResults->setItems($collection->getItems());
-        $searchResults->setTotalCount($collection->getSize());
-
-        return $searchResults;
-    }
 }

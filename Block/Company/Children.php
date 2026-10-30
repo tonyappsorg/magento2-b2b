@@ -60,13 +60,9 @@ class Children extends Template
 
     public function getStatusLabel(CompanyInterface $child): string
     {
-        foreach ($this->statusSource->toOptionArray() as $option) {
-            if ($option['value'] === $child->getStatus()) {
-                return (string)$option['label'];
-            }
-        }
+        $labels = array_column($this->statusSource->toOptionArray(), 'label', 'value');
 
-        return '';
+        return (string)($labels[$child->getStatus()] ?? '');
     }
 
     /**
@@ -74,12 +70,7 @@ class Children extends Template
      */
     public function getCountryOptions(): array
     {
-        $options = [];
-        foreach ($this->countryCollectionFactory->create()->loadByStore()->toOptionArray(false) as $country) {
-            $options[] = ['value' => (string)$country['value'], 'label' => (string)$country['label']];
-        }
-
-        return $options;
+        return $this->countryCollectionFactory->create()->loadByStore()->toOptionArray(false);
     }
 
     public function getSaveUrl(): string
@@ -97,13 +88,10 @@ class Children extends Template
      */
     public function getChildrenJson(): string
     {
-        $fields = ['name', 'legal_name', 'vat_tax_id', 'email', 'telephone',
-                   'street', 'city', 'region', 'postcode', 'country_id'];
-
         $children = [];
         foreach ($this->getChildren() as $child) {
             $row = ['entity_id' => (int)$child->getId()];
-            foreach ($fields as $field) {
+            foreach (CompanyInterface::CUSTOMER_EDITABLE_FIELDS as $field) {
                 $row[$field] = (string)($child->getData($field) ?? '');
             }
             $children[(int)$child->getId()] = $row;

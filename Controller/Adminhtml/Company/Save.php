@@ -9,7 +9,6 @@ use Magento\Framework\App\Request\DataPersistorInterface;
 use Magento\Framework\Controller\Result\Redirect;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
-use Magento\Framework\Registry;
 use Tonyapps\B2b\Api\CompanyRepositoryInterface;
 use Tonyapps\B2b\Api\Data\CompanyInterface;
 use Tonyapps\B2b\Model\CompanyFactory;
@@ -31,13 +30,12 @@ class Save extends AbstractCompany implements HttpPostActionInterface
     public function __construct(
         Context $context,
         CompanyRepositoryInterface $companyRepository,
-        CompanyFactory $companyFactory,
-        Registry $coreRegistry,
+        private readonly CompanyFactory $companyFactory,
         private readonly DataPersistorInterface $dataPersistor,
         private readonly CompanyStatus $companyStatus,
         private readonly CompanyPayment $companyPayment
     ) {
-        parent::__construct($context, $companyRepository, $companyFactory, $coreRegistry);
+        parent::__construct($context, $companyRepository);
     }
 
     public function execute(): Redirect

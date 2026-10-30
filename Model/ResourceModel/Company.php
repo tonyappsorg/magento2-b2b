@@ -179,49 +179,6 @@ class Company extends AbstractDb
     }
 
     /**
-     * payment_mode of each company on the path, keyed by ID, in the order given.
-     *
-     * @param int[] $pathIds
-     * @return array<int, int>
-     */
-    public function getPaymentModesByPath(array $pathIds): array
-    {
-        if (!$pathIds) {
-            return [];
-        }
-
-        $connection = $this->getConnection();
-        $select = $connection->select()
-            ->from($this->getMainTable(), [CompanyInterface::ENTITY_ID, CompanyInterface::PAYMENT_MODE])
-            ->where(CompanyInterface::ENTITY_ID . ' IN (?)', $pathIds);
-
-        $rows = $connection->fetchPairs($select);
-        $ordered = [];
-        foreach ($pathIds as $pathId) {
-            if (array_key_exists($pathId, $rows)) {
-                $ordered[$pathId] = (int)$rows[$pathId];
-            }
-        }
-
-        return $ordered;
-    }
-
-    /**
-     * Status of a single company, or NULL when it does not exist.
-     */
-    public function getStatusById(int $companyId): ?int
-    {
-        $connection = $this->getConnection();
-        $select = $connection->select()
-            ->from($this->getMainTable(), CompanyInterface::STATUS)
-            ->where(CompanyInterface::ENTITY_ID . ' = ?', $companyId);
-
-        $status = $connection->fetchOne($select);
-
-        return $status === false || $status === null ? null : (int)$status;
-    }
-
-    /**
      * A company and everything below it: path and status, keyed by company ID.
      *
      * Status comes along because only an active company may confer its customer group, and the
@@ -358,30 +315,27 @@ class Company extends AbstractDb
     }
 
     /**
-     * customer_group_id of each company on the path, keyed by ID, root first.
+     * Return a company column for a set of IDs, preserving their input order.
      *
-     * One query for the whole ancestor chain — the input is the company's own path, so the IDs are
-     * already known and no recursion is needed.
-     *
-     * @param int[] $pathIds
+     * @param int[] $ids
      * @return array<int, int|null>
      */
-    public function getGroupIdsByPath(array $pathIds): array
+    public function getColumnByIds(string $column, array $ids): array
     {
-        if (!$pathIds) {
+        if (!$ids) {
             return [];
         }
 
         $connection = $this->getConnection();
         $select = $connection->select()
-            ->from($this->getMainTable(), [CompanyInterface::ENTITY_ID, CompanyInterface::CUSTOMER_GROUP_ID])
-            ->where(CompanyInterface::ENTITY_ID . ' IN (?)', $pathIds);
+            ->from($this->getMainTable(), [CompanyInterface::ENTITY_ID, $column])
+            ->where(CompanyInterface::ENTITY_ID . ' IN (?)', $ids);
 
         $rows = $connection->fetchPairs($select);
         $ordered = [];
-        foreach ($pathIds as $pathId) {
-            if (array_key_exists($pathId, $rows)) {
-                $ordered[$pathId] = $rows[$pathId] === null ? null : (int)$rows[$pathId];
+        foreach ($ids as $id) {
+            if (array_key_exists($id, $rows)) {
+                $ordered[$id] = $rows[$id] === null ? null : (int)$rows[$id];
             }
         }
 
