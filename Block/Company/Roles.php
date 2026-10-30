@@ -16,6 +16,16 @@ use Tonyapps\B2b\Model\ResourceModel\Role as RoleResource;
  */
 class Roles extends Template
 {
+    /**
+     * @var RoleInterface[]|null
+     */
+    private ?array $roles = null;
+
+    /**
+     * @var array<int, int>|null
+     */
+    private ?array $memberCounts = null;
+
     public function __construct(
         Context $context,
         private readonly CompanyContext $companyContext,
@@ -32,9 +42,14 @@ class Roles extends Template
      */
     public function getRoles(): array
     {
+        if ($this->roles !== null) {
+            return $this->roles;
+        }
         $company = $this->companyContext->getCompany();
 
-        return $company === null ? [] : $this->roleRepository->getByCompanyId((int)$company->getId());
+        return $this->roles = $company === null
+            ? []
+            : $this->roleRepository->getByCompanyId((int)$company->getId());
     }
 
     public function canManage(): bool
@@ -62,7 +77,12 @@ class Roles extends Template
 
     public function getMemberCount(RoleInterface $role): int
     {
-        return $this->roleResource->countMembers((int)$role->getId());
+        // One query for the whole list instead of one per row.
+        $this->memberCounts ??= $this->roleResource->countMembersByRole(
+            array_map(static fn(RoleInterface $role): int => (int)$role->getId(), $this->getRoles())
+        );
+
+        return $this->memberCounts[(int)$role->getId()] ?? 0;
     }
 
     public function getSaveUrl(): string

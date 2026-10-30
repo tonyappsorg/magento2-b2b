@@ -24,6 +24,11 @@ class Orders extends Template
      */
     private $orders = null;
 
+    /**
+     * @var int[]|null
+     */
+    private ?array $subtreeIds = null;
+
     public function __construct(
         Context $context,
         private readonly CompanyContext $companyContext,
@@ -56,7 +61,7 @@ class Orders extends Template
 
         $collection
             ->addFieldToSelect(['increment_id', 'created_at', 'status', 'grand_total', 'customer_id', 'company_id'])
-            ->addFieldToFilter('company_id', ['in' => $this->companyResource->getSubtreeIds((int)$company->getId())])
+            ->addFieldToFilter('company_id', ['in' => $this->getSubtreeIds((int)$company->getId())])
             // The same rule as core's own order history and AllowCompanyOrderView: statuses marked visible on
             // the storefront. Filtering out state "new" hid every store-credit order, which stays "new".
             ->addFieldToFilter('status', ['in' => $this->orderConfig->getVisibleOnFrontStatuses()])
@@ -77,7 +82,18 @@ class Orders extends Template
     {
         $company = $this->companyContext->getCompany();
 
-        return $company === null ? [] : $this->companyResource->getCompanyOptions();
+        // Only the subtree's names: the orders listed can't belong to any other company.
+        return $company === null
+            ? []
+            : $this->companyResource->getCompanyOptions(null, $this->getSubtreeIds((int)$company->getId()));
+    }
+
+    /**
+     * @return int[]
+     */
+    private function getSubtreeIds(int $companyId): array
+    {
+        return $this->subtreeIds ??= $this->companyResource->getSubtreeIds($companyId);
     }
 
     public function getViewUrl(Order $order): string

@@ -5,7 +5,7 @@
     <head><title translate="true">Edit Company Profile</title></head>
     <body>
         <referenceContainer name="content">
-            <block class="Tonyapps\B2b\Block\Company\Form" name="tonyapps_b2b.company.edit"
+            <block class="Tonyapps\B2b\Block\Company\Form" name="tonyapps_b2b.company.edit" cacheable="false"
                    template="Tonyapps_B2b::company/form.phtml"/>
         </referenceContainer>
     </body>

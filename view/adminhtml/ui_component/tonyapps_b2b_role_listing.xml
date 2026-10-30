@@ -15,6 +15,10 @@
 
     <dataSource name="tonyapps_b2b_role_listing_data_source" component="Magento_Ui/js/grid/provider">
         <settings>
+            <!-- Keep the company scope on every reload (paging, sorting, filtering) of the grid. -->
+            <filterUrlParams>
+                <param name="company_id">*</param>
+            </filterUrlParams>
             <storageConfig>
                 <param name="indexField" xsi:type="string">role_id</param>
             </storageConfig>

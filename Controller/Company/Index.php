@@ -10,9 +10,14 @@ use Tonyapps\B2b\Controller\AbstractCompanyAction;
 
 /**
  * Company dashboard: profile summary, visible to every member.
+ *
+ * Membership is enough, not a permission: a company awaiting approval (or blocked) grants none,
+ * and this page is where its members learn that.
  */
 class Index extends AbstractCompanyAction implements HttpGetActionInterface
 {
+    protected string $requiredPermission = '';
+
     protected function executeForCompany(CompanyInterface $company): ResultInterface
     {
         return $this->resultFactory->create(\Magento\Framework\Controller\ResultFactory::TYPE_PAGE);

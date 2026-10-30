@@ -46,15 +46,22 @@ class CompanyStatus
      *
      * Split out for the admin form, which saves the whole company in one go and only afterwards
      * knows the status moved.
+     *
+     * @param int|null $previousGroupId group the company resolved to before the save, so clearing
+     *        it takes the old group off members still in it
      */
-    public function applySideEffects(CompanyInterface $company, int $oldStatus, int $newStatus): void
-    {
+    public function applySideEffects(
+        CompanyInterface $company,
+        int $oldStatus,
+        int $newStatus,
+        ?int $previousGroupId = null
+    ): void {
         // Groups are re-applied on every save, not only on a status change: the customer group
         // and the parent company can both move what a subtree resolves to. It is idempotent.
         $companyId = (int)$company->getId();
 
         if ($newStatus === CompanyInterface::STATUS_ACTIVE) {
-            $this->customerGroupSync->syncCompanyTree($companyId);
+            $this->customerGroupSync->syncCompanyTree($companyId, $previousGroupId);
         } else {
             // Pending, rejected and blocked companies do not confer their group on anyone.
             $this->customerGroupSync->releaseCompanyTree($companyId);

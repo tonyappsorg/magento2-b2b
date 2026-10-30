@@ -19,6 +19,7 @@ use Tonyapps\B2b\Api\Data\RoleInterface;
 use Tonyapps\B2b\Api\RoleRepositoryInterface;
 use Tonyapps\B2b\Controller\AbstractCompanyAction;
 use Tonyapps\B2b\Model\CompanyContext;
+use Tonyapps\B2b\Model\PermissionChecker;
 use Tonyapps\B2b\Model\Permissions;
 use Tonyapps\B2b\Model\RoleFactory;
 
@@ -39,7 +40,8 @@ class Save extends AbstractCompanyAction implements HttpPostActionInterface
         private readonly FormKeyValidator $formKeyValidator,
         private readonly RoleRepositoryInterface $roleRepository,
         private readonly RoleFactory $roleFactory,
-        private readonly LoggerInterface $logger
+        private readonly LoggerInterface $logger,
+        private readonly PermissionChecker $permissionChecker
     ) {
         parent::__construct($request, $resultFactory, $companyContext, $customerSession, $messageManager, $url);
     }
@@ -62,10 +64,20 @@ class Save extends AbstractCompanyAction implements HttpPostActionInterface
                 throw new LocalizedException(__('That role does not belong to your company.'));
             }
 
+            $actingId = (int)$this->companyContext->getCustomerId();
+            if ($roleId && $this->permissionChecker->holdsRole($actingId, $company, $roleId)) {
+                throw new LocalizedException(__('You cannot change the role you hold yourself.'));
+            }
+
+            $permissions = array_map('strval', (array)($data['permissions'] ?? []));
+            if (!$this->permissionChecker->canGrant($actingId, $company, $permissions)) {
+                throw new LocalizedException(__('You cannot grant permissions you do not have yourself.'));
+            }
+
             $role->setCompanyId((int)$company->getId());
             $role->setRoleName(trim((string)($data[RoleInterface::ROLE_NAME] ?? '')));
             $role->setIsDefault(!empty($data[RoleInterface::IS_DEFAULT]));
-            $role->setPermissions(array_map('strval', (array)($data['permissions'] ?? [])));
+            $role->setPermissions($permissions);
 
             $this->roleRepository->save($role);
             $this->messageManager->addSuccessMessage(__('The role has been saved.'));

@@ -65,6 +65,30 @@ class PermissionChecker
     }
 
     /**
+     * Whether a customer may hand out these permissions: only ones they hold themselves.
+     *
+     * @param string[] $permissions
+     */
+    public function canGrant(int $customerId, CompanyInterface $company, array $permissions): bool
+    {
+        return !array_diff($this->permissions->normalise($permissions), $this->getPermissions($customerId, $company));
+    }
+
+    /**
+     * Whether this is the role that decides what the customer may do (their own, or the default
+     * they fall back to). The company administrator is not limited by any role.
+     */
+    public function holdsRole(int $customerId, CompanyInterface $company, int $roleId): bool
+    {
+        if ($company->getAdminCustomerId() === $customerId) {
+            return false;
+        }
+        $role = $this->getRoleFor($customerId, (int)$company->getId());
+
+        return $role !== null && (int)$role->getId() === $roleId;
+    }
+
+    /**
      * @return string[]
      */
     private function resolve(int $customerId, CompanyInterface $company): array

@@ -126,8 +126,13 @@ class StoreCredit
      * order comes back, and only once however many times a cancel is triggered. Capped at
      * $canceledAmount so a partly invoiced order keeps paying for what was invoiced.
      */
-    public function revertOrder(int $companyId, int $orderId, string $incrementId, float $canceledAmount): ?float
-    {
+    public function revertOrder(
+        int $companyId,
+        int $orderId,
+        string $incrementId,
+        float $canceledAmount,
+        ?string $comment = null
+    ): ?float {
         $spent = -$this->creditHistory->getNetForOrder($this->getPoolCompanyId($companyId), $incrementId);
         $spent = min($spent, $canceledAmount);
         if ($spent < self::EPSILON) {
@@ -137,7 +142,7 @@ class StoreCredit
         return $this->applyDelta($companyId, $spent, self::TYPE_REVERT, [
             'order_id' => $orderId ?: null,
             'order_increment_id' => $incrementId,
-            'comment' => (string)__('Order cancelled'),
+            'comment' => $comment ?? (string)__('Order cancelled'),
         ]);
     }
 
@@ -154,10 +159,9 @@ class StoreCredit
      *
      * ponytail: the lock makes concurrent checkouts safe against each other, but the debit is
      * committed before Magento saves the order row — Magento does not wrap order placement in a
-     * transaction we can join. If that save then fails, the ledger holds a spend with no order,
-     * traceable by its order_increment_id and correctable with an adjustment. Closing that window
-     * properly means owning the submit transaction, which is a much larger change than the risk
-     * justifies at this volume.
+     * transaction we can join. If that save then fails, RevertStoreCreditOnFailedOrder gives the
+     * spend back on sales_model_service_quote_submit_failure; only a crash between the two leaves
+     * a spend with no order, traceable by its order_increment_id and correctable with an adjustment.
      *
      * @param array<string, mixed> $entry
      * @throws LocalizedException

@@ -44,6 +44,14 @@ class CustomerGroupSyncTest extends TestCase
      */
     private array $selectedCustomerIds = [];
 
+    /**
+     * Customers a "group_id = ?" lookup finds still in the group it asks about.
+     *
+     * @var int[]
+     */
+    private array $inQueriedGroup = [];
+    private bool $filtersOnGroup = false;
+
     protected function setUp(): void
     {
         $this->connection = $this->createMock(AdapterInterface::class);
@@ -59,6 +67,10 @@ class CustomerGroupSyncTest extends TestCase
             function (string $condition, $value = null) use ($select): Select {
                 if ($condition === 'entity_id IN (?)') {
                     $this->selectedCustomerIds = $value;
+                    $this->filtersOnGroup = false;
+                }
+                if ($condition === 'group_id = ?') {
+                    $this->filtersOnGroup = true;
                 }
 
                 return $select;
@@ -68,7 +80,9 @@ class CustomerGroupSyncTest extends TestCase
         $this->connection->method('fetchOne')->willReturnCallback(fn(): int => $this->currentGroupId);
         // Every customer applyGroup looks at is treated as not being in the target group yet.
         $this->connection->method('fetchCol')->willReturnCallback(
-            fn(): array => $this->selectedCustomerIds
+            fn(): array => $this->filtersOnGroup
+                ? array_values(array_intersect($this->selectedCustomerIds, $this->inQueriedGroup))
+                : $this->selectedCustomerIds
         );
         $this->connection->method('update')->willReturnCallback(
             function (string $table, array $bind, array $where): int {
@@ -302,5 +316,33 @@ class CustomerGroupSyncTest extends TestCase
         $this->sync->syncCompanyTree(4);
 
         self::assertSame([['ids' => [300], 'groupId' => 1]], $this->updates);
+    }
+
+    public function testClearingTheGroupSendsMembersStillInTheOldGroupToTheDefault(): void
+    {
+        $this->companyResource->method('getSubtree')->willReturn([
+            1 => ['path' => '1', 'status' => CompanyInterface::STATUS_ACTIVE],
+        ]);
+        $this->settingResolver->method('resolveCustomerGroupIds')->willReturn([1 => null]);
+        $this->companyCustomer->method('getMemberIds')->with([1])->willReturn([100, 200]);
+        // Only 100 is still in old group 5; 200 was moved to another group by hand.
+        $this->inQueriedGroup = [100];
+
+        $this->sync->syncCompanyTree(1, 5);
+
+        self::assertSame([['ids' => [100], 'groupId' => 1]], $this->updates);
+    }
+
+    public function testWithoutAPreviousGroupMembersOfAnUngroupedCompanyAreLeftAlone(): void
+    {
+        $this->companyResource->method('getSubtree')->willReturn([
+            1 => ['path' => '1', 'status' => CompanyInterface::STATUS_ACTIVE],
+        ]);
+        $this->settingResolver->method('resolveCustomerGroupIds')->willReturn([1 => null]);
+        $this->companyCustomer->expects(self::never())->method('getMemberIds');
+
+        $this->sync->syncCompanyTree(1, null);
+
+        self::assertSame([], $this->updates);
     }
 }

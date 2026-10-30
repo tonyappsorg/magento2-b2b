@@ -218,4 +218,14 @@ class StoreCreditTest extends TestCase
         $this->expectException(LocalizedException::class);
         $this->storeCredit->debit(9, 0.0, 1, '1', 7);
     }
+
+    public function testARevertCanSayWhyTheMoneyCameBack(): void
+    {
+        $this->balance = 70.0;
+        $this->creditHistory->method('getNetForOrder')->willReturn(-30.0);
+
+        self::assertSame(100.0, $this->storeCredit->revertOrder(9, 0, '000000555', PHP_FLOAT_MAX, 'Order could not be placed'));
+        self::assertSame('Order could not be placed', $this->inserts[0]['comment']);
+        self::assertArrayNotHasKey('order_id', $this->inserts[0]);
+    }
 }

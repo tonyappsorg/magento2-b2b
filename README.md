@@ -545,3 +545,25 @@ causes, both pre-existing and unrelated to Tonyapps_B2b:
 - **Plan corrections**: there is no separate "credit enable" setting; the store credit payment method's own
   *Enabled* flag (Sales > Payment Methods) is that switch. There is no "auto-refund" setting either: credit memos
   and cancellations always return credit to the pool.
+
+## Review fixes (2026-10-30)
+
+- **Company pages are never full-page cached**: the content block of every `b2b_*` storefront page is
+  `cacheable="false"`, so one member can't be served another's users, credit or orders.
+- **Store Credit is offered again**: `can_use_checkout` and `can_use_internal` are set; the payment Adapter
+  reads them itself and treated them as off.
+- **A failed order submit gives the debit back** (`sales_model_service_quote_submit_failure`): the ledger's
+  net for that increment ID is reverted, unless the order row was in fact saved. The retry, which reuses the
+  increment ID, is debited once.
+- **No self-promotion**: a member can only assign a role (or leave someone on a default role) whose
+  permissions they hold themselves, can only save a role with permissions they hold, and can't edit or
+  delete the role they act under (their own, or the default they fall back to).
+- **Clearing a company's customer group** (or moving it under a parent without one) sends members still in
+  the old group to the default group; a group set by hand is kept.
+- **Pending and blocked companies** can open their dashboard: it needs membership, not a permission.
+- **Credit memo refunds** move the ledger after the credit memo commits
+  (`sales_order_creditmemo_save_commit_after`, once per refund), so a ledger failure can't break the memo.
+- **Admin**: the roles grid keeps its `company_id` scope on reload; assigning a company on the customer form
+  needs `Tonyapps_B2b::companies`; the "new company" email links to the admin edit page.
+- **Fewer queries**: Company Orders loads only the subtree's company names, role member counts are one query,
+  and the users list loads once per render.

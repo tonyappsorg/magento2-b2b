@@ -24,6 +24,11 @@ class Users extends Template
      */
     private ?array $roleIds = null;
 
+    /**
+     * @var CustomerInterface[]|null
+     */
+    private ?array $users = null;
+
     public function __construct(
         Context $context,
         private readonly CompanyContext $companyContext,
@@ -40,9 +45,12 @@ class Users extends Template
      */
     public function getUsers(): array
     {
+        if ($this->users !== null) {
+            return $this->users;
+        }
         $company = $this->companyContext->getCompany();
 
-        return $company === null ? [] : $this->userManagement->getUsers((int)$company->getId());
+        return $this->users = $company === null ? [] : $this->userManagement->getUsers((int)$company->getId());
     }
 
     public function isAdministrator(CustomerInterface $customer): bool

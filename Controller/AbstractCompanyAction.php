@@ -28,7 +28,8 @@ abstract class AbstractCompanyAction implements ActionInterface
      * Permission this page needs, from Tonyapps\B2b\Model\Permissions.
      *
      * Declared per controller rather than mapped in an observer: a new page cannot be added
-     * without deciding what it requires, and the requirement sits where the page is.
+     * without deciding what it requires, and the requirement sits where the page is. An empty
+     * string means membership alone is enough, whatever the company's status.
      */
     protected string $requiredPermission = Permissions::PROFILE_VIEW;
 
@@ -59,7 +60,7 @@ abstract class AbstractCompanyAction implements ActionInterface
             return $this->redirect('customer/account');
         }
 
-        if (!$this->companyContext->isAllowed($this->requiredPermission)) {
+        if ($this->requiredPermission !== '' && !$this->companyContext->isAllowed($this->requiredPermission)) {
             $this->messageManager->addErrorMessage(
                 __('You do not have permission to do that. Ask your company administrator.')
             );

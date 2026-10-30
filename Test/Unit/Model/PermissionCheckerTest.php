@@ -192,4 +192,36 @@ class PermissionCheckerTest extends TestCase
         $this->checker->getPermissions(7, $this->company());
     }
 
+    public function testAMemberCanGrantOnlyWhatTheyHold(): void
+    {
+        $this->companyCustomer->method('getRoleId')->willReturn(3);
+        $this->roleRepository->method('getById')->willReturn($this->role([Permissions::USERS_MANAGE]));
+
+        self::assertTrue($this->checker->canGrant(7, $this->company(), [Permissions::USERS_VIEW]));
+        // users_manage implies users_view, which they hold too.
+        self::assertTrue($this->checker->canGrant(7, $this->company(), [Permissions::USERS_MANAGE]));
+        self::assertFalse($this->checker->canGrant(7, $this->company(), [Permissions::ROLES_MANAGE]));
+    }
+
+    public function testTheAdministratorCanGrantAnything(): void
+    {
+        self::assertTrue($this->checker->canGrant(1, $this->company(), (new Permissions())->getAll()));
+    }
+
+    public function testHoldsRoleCoversTheOwnRoleAndTheDefaultAMemberFallsBackTo(): void
+    {
+        $own = $this->role([]);
+        $own->method('getId')->willReturn(3);
+        $this->companyCustomer->method('getRoleId')->willReturnMap([[7, 3], [8, null]]);
+        $this->roleRepository->method('getById')->willReturn($own);
+        $default = $this->role([]);
+        $default->method('getId')->willReturn(4);
+        $this->roleRepository->method('getDefaultForCompany')->willReturn($default);
+
+        self::assertTrue($this->checker->holdsRole(7, $this->company(), 3));
+        self::assertFalse($this->checker->holdsRole(7, $this->company(), 4));
+        self::assertTrue($this->checker->holdsRole(8, $this->company(), 4));
+        // The administrator is not limited by a role, so editing one cannot raise their rights.
+        self::assertFalse($this->checker->holdsRole(1, $this->company(), 3));
+    }
 }

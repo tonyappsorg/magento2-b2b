@@ -82,4 +82,25 @@ class Role extends AbstractDb
 
         return (int)$connection->fetchOne($select);
     }
+
+    /**
+     * How many members hold each of these roles, in one query; a role nobody holds is left out.
+     *
+     * @param int[] $roleIds
+     * @return array<int, int> member count keyed by role ID
+     */
+    public function countMembersByRole(array $roleIds): array
+    {
+        if (!$roleIds) {
+            return [];
+        }
+
+        $connection = $this->getConnection();
+        $select = $connection->select()
+            ->from($this->getTable(CompanyCustomer::TABLE), ['role_id', new \Zend_Db_Expr('COUNT(*)')])
+            ->where('role_id IN (?)', $roleIds)
+            ->group('role_id');
+
+        return array_map('intval', $connection->fetchPairs($select));
+    }
 }

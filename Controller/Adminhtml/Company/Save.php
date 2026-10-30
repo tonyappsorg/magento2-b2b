@@ -14,6 +14,7 @@ use Tonyapps\B2b\Api\Data\CompanyInterface;
 use Tonyapps\B2b\Model\CompanyFactory;
 use Tonyapps\B2b\Model\CompanyStatus;
 use Tonyapps\B2b\Model\ResourceModel\CompanyPayment;
+use Tonyapps\B2b\Model\SettingResolver;
 
 class Save extends AbstractCompany implements HttpPostActionInterface
 {
@@ -33,7 +34,8 @@ class Save extends AbstractCompany implements HttpPostActionInterface
         private readonly CompanyFactory $companyFactory,
         private readonly DataPersistorInterface $dataPersistor,
         private readonly CompanyStatus $companyStatus,
-        private readonly CompanyPayment $companyPayment
+        private readonly CompanyPayment $companyPayment,
+        private readonly SettingResolver $settingResolver
     ) {
         parent::__construct($context, $companyRepository);
     }
@@ -63,6 +65,9 @@ class Save extends AbstractCompany implements HttpPostActionInterface
         // -1 for a company that does not exist yet: no status it could have moved away from, so
         // the side effects run but the customer is not emailed about a decision they never asked for.
         $oldStatus = $companyId ? $company->getStatus() : -1;
+        // What members were given before this save, so clearing the group (or moving the company
+        // under a parent without one) can take it back.
+        $previousGroupId = $companyId ? $this->settingResolver->resolveCustomerGroupId($company->getPath()) : null;
         // Not a company column; pulled out before the rest is handed to the model.
         $paymentMethods = (array)($data['payment_methods'] ?? []);
         $company->addData($this->prepareData($data));
@@ -72,7 +77,7 @@ class Save extends AbstractCompany implements HttpPostActionInterface
             $this->companyPayment->setMethodCodes((int)$company->getId(), $paymentMethods);
             // Both the group and the parent can change what members resolve to, so re-apply
             // across the whole subtree rather than working out whether it moved.
-            $this->companyStatus->applySideEffects($company, $oldStatus, $company->getStatus());
+            $this->companyStatus->applySideEffects($company, $oldStatus, $company->getStatus(), $previousGroupId);
 
             $this->messageManager->addSuccessMessage(__('The company has been saved.'));
             $this->dataPersistor->clear(self::DATA_PERSISTOR_KEY);

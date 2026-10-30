@@ -20,7 +20,18 @@
                   instance="Tonyapps\B2b\Observer\DebitStoreCreditOnOrder"/>
     </event>
 
+    <!-- The order row was never saved (or the submit failed after the debit): give the debit back. -->
+    <event name="sales_model_service_quote_submit_failure">
+        <observer name="tonyapps_b2b_revert_store_credit_on_failure"
+                  instance="Tonyapps\B2b\Observer\RevertStoreCreditOnFailedOrder"/>
+    </event>
+
+    <!-- Marks the credit memo; the ledger moves after CreditmemoService commits (see RefundStoreCredit). -->
     <event name="sales_order_creditmemo_refund">
+        <observer name="tonyapps_b2b_refund_store_credit"
+                  instance="Tonyapps\B2b\Observer\RefundStoreCredit"/>
+    </event>
+    <event name="sales_order_creditmemo_save_commit_after">
         <observer name="tonyapps_b2b_refund_store_credit"
                   instance="Tonyapps\B2b\Observer\RefundStoreCredit"/>
     </event>

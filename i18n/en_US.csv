@@ -246,3 +246,7 @@
 "Store credit can only be used by a company account.","Store credit can only be used by a company account."
 "Pick a company to manage credit for.","Pick a company to manage credit for."
 "Refund for order %1","Refund for order %1"
+"Order could not be placed","Order could not be placed"
+"You cannot give a role with permissions you do not have yourself.","You cannot give a role with permissions you do not have yourself."
+"You cannot change the role you hold yourself.","You cannot change the role you hold yourself."
+"You cannot grant permissions you do not have yourself.","You cannot grant permissions you do not have yourself."

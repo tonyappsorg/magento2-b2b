@@ -49,10 +49,14 @@ class CustomerGroupSync
      *
      * Descendants that set their own group keep it, so each company in the subtree is resolved
      * separately; companies that land on the same group are updated in one statement.
+     *
+     * @param int|null $previousGroupId the group the company resolved to before the change that
+     *        triggered this sync; members of companies that now resolve to no group and are still
+     *        in it go back to the default group, so clearing the group takes its pricing away.
      */
-    public function syncCompanyTree(int $companyId): void
+    public function syncCompanyTree(int $companyId, ?int $previousGroupId = null): void
     {
-        $this->applyToTree($companyId, false);
+        $this->applyToTree($companyId, false, $previousGroupId);
     }
 
     /**
@@ -132,7 +136,7 @@ class CustomerGroupSync
      *
      * @param bool $release treat every company as no longer entitled to confer its group
      */
-    private function applyToTree(int $companyId, bool $release): void
+    private function applyToTree(int $companyId, bool $release, ?int $previousGroupId = null): void
     {
         $subtree = $this->companyResource->getSubtree($companyId);
         if (!$subtree) {
@@ -152,9 +156,12 @@ class CustomerGroupSync
         }
 
         $companyIdsByGroup = [];
+        $ungrouped = [];
         foreach ($subtree as $subtreeCompanyId => $row) {
             if ($resolved[$subtreeCompanyId] === null) {
-                // No company on this path manages a group, so its members are not ours to move.
+                // No company on this path manages a group, so its members are not ours to move —
+                // except out of the group it managed until now.
+                $ungrouped[] = (int)$subtreeCompanyId;
                 continue;
             }
 
@@ -166,6 +173,11 @@ class CustomerGroupSync
         $changed = [];
         foreach ($companyIdsByGroup as $groupId => $companyIds) {
             $changed[] = $this->applyGroup($this->companyCustomer->getMemberIds($companyIds), (int)$groupId);
+        }
+
+        if ($previousGroupId !== null && $ungrouped) {
+            $stillInOldGroup = $this->filterByGroup($this->companyCustomer->getMemberIds($ungrouped), $previousGroupId);
+            $changed[] = $this->applyGroup($stillInOldGroup, $this->getDefaultGroupId());
         }
 
         $this->reindex($changed ? array_merge(...$changed) : []);
@@ -188,6 +200,27 @@ class CustomerGroupSync
         }
 
         return true;
+    }
+
+    /**
+     * The customers among these who are in the given group; a group set by hand is left alone.
+     *
+     * @param int[] $customerIds
+     * @return int[]
+     */
+    private function filterByGroup(array $customerIds, int $groupId): array
+    {
+        if (!$customerIds) {
+            return [];
+        }
+
+        $connection = $this->resourceConnection->getConnection();
+        $select = $connection->select()
+            ->from($this->resourceConnection->getTableName('customer_entity'), 'entity_id')
+            ->where('entity_id IN (?)', $customerIds)
+            ->where('group_id = ?', $groupId);
+
+        return array_map('intval', $connection->fetchCol($select));
     }
 
     private function getDefaultGroupId(): int

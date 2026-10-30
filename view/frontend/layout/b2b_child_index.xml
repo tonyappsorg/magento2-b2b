@@ -5,7 +5,7 @@
     <head><title translate="true">Child Companies</title></head>
     <body>
         <referenceContainer name="content">
-            <block class="Tonyapps\B2b\Block\Company\Children" name="tonyapps_b2b.company.children"
+            <block class="Tonyapps\B2b\Block\Company\Children" name="tonyapps_b2b.company.children" cacheable="false"
                    template="Tonyapps_B2b::company/children.phtml"/>
         </referenceContainer>
     </body>

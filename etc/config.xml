@@ -26,6 +26,9 @@
                 <title>Store Credit</title>
                 <allowspecific>0</allowspecific>
                 <group>offline</group>
+                <!-- The Adapter reads these itself; without them the method is never offered. -->
+                <can_use_checkout>1</can_use_checkout>
+                <can_use_internal>1</can_use_internal>
                 <sort_order>5</sort_order>
             </tonyapps_b2b_credit>
         </payment>

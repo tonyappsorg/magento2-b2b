@@ -17,6 +17,7 @@ use Tonyapps\B2b\Api\Data\CompanyInterface;
 use Tonyapps\B2b\Api\RoleRepositoryInterface;
 use Tonyapps\B2b\Controller\AbstractCompanyAction;
 use Tonyapps\B2b\Model\CompanyContext;
+use Tonyapps\B2b\Model\PermissionChecker;
 use Tonyapps\B2b\Model\Permissions;
 
 /**
@@ -34,7 +35,8 @@ class Delete extends AbstractCompanyAction implements HttpPostActionInterface
         ManagerInterface $messageManager,
         UrlInterface $url,
         private readonly FormKeyValidator $formKeyValidator,
-        private readonly RoleRepositoryInterface $roleRepository
+        private readonly RoleRepositoryInterface $roleRepository,
+        private readonly PermissionChecker $permissionChecker
     ) {
         parent::__construct($request, $resultFactory, $companyContext, $customerSession, $messageManager, $url);
     }
@@ -49,6 +51,14 @@ class Delete extends AbstractCompanyAction implements HttpPostActionInterface
             $role = $this->roleRepository->getById((int)$this->request->getParam('role_id'));
             if ($role->getCompanyId() !== (int)$company->getId()) {
                 throw new LocalizedException(__('That role does not belong to your company.'));
+            }
+            // Deleting it would drop them onto the company default, which may grant more.
+            if ($this->permissionChecker->holdsRole(
+                (int)$this->companyContext->getCustomerId(),
+                $company,
+                (int)$role->getId()
+            )) {
+                throw new LocalizedException(__('You cannot change the role you hold yourself.'));
             }
 
             $this->roleRepository->delete($role);

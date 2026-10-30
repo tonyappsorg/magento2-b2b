@@ -3,12 +3,12 @@ declare(strict_types=1);
 
 namespace Tonyapps\B2b\Model;
 
+use Magento\Backend\Model\UrlInterface as BackendUrlInterface;
 use Magento\Customer\Api\CustomerRepositoryInterface;
 use Magento\Customer\Api\CustomerNameGenerationInterface;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\Mail\Template\TransportBuilder;
 use Magento\Framework\Translate\Inline\StateInterface;
-use Magento\Framework\UrlInterface;
 use Magento\Store\Model\Store;
 use Magento\Store\Model\StoreManagerInterface;
 use Psr\Log\LoggerInterface;
@@ -35,7 +35,8 @@ class CompanyEmail
         private readonly Config $config,
         private readonly CustomerRepositoryInterface $customerRepository,
         private readonly CustomerNameGenerationInterface $customerNameGeneration,
-        private readonly UrlInterface $urlBuilder,
+        // The admin URL builder: the storefront one points the link at a frontend route (404).
+        private readonly BackendUrlInterface $urlBuilder,
         private readonly LoggerInterface $logger
     ) {
     }
@@ -60,7 +61,8 @@ class CompanyEmail
                 'admin_email' => $admin['email'],
                 'admin_url' => $this->urlBuilder->getUrl(
                     'tonyapps_b2b/company/edit',
-                    ['entity_id' => $company->getId(), '_nosid' => true]
+                    // No secret key: it would be minted for this request, not the reader's admin session.
+                    ['entity_id' => $company->getId(), '_nosid' => true, '_nosecret' => true]
                 ),
             ]
         );

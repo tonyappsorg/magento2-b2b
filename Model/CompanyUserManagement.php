@@ -38,7 +38,8 @@ class CompanyUserManagement
         private readonly CompanyCustomer $companyCustomer,
         private readonly StoreManagerInterface $storeManager,
         private readonly RoleRepositoryInterface $roleRepository,
-        private readonly SearchCriteriaBuilder $searchCriteriaBuilder
+        private readonly SearchCriteriaBuilder $searchCriteriaBuilder,
+        private readonly PermissionChecker $permissionChecker
     ) {
     }
 
@@ -70,9 +71,10 @@ class CompanyUserManagement
         string $email,
         string $firstname,
         string $lastname,
-        ?int $roleId = null
+        ?int $roleId = null,
+        ?int $actingCustomerId = null
     ): int {
-        $roleId = $this->validateRole($company, $roleId);
+        $roleId = $this->validateRole($company, $roleId, $actingCustomerId);
 
         $email = trim($email);
         $firstname = trim($firstname);
@@ -151,28 +153,38 @@ class CompanyUserManagement
             );
         }
 
-        $this->membership->setRole($customerId, $this->validateRole($company, $roleId));
+        $this->membership->setRole($customerId, $this->validateRole($company, $roleId, $actingCustomerId));
     }
 
     /**
-     * Refuse a role belonging to somebody else's company.
+     * Refuse a role belonging to somebody else's company, and one granting more than the acting
+     * member holds — otherwise anyone allowed to manage users could create an account for a second
+     * address of their own with the strongest role. NULL means the company default, which is
+     * checked the same way.
      *
      * @throws LocalizedException
      */
-    private function validateRole(CompanyInterface $company, ?int $roleId): ?int
+    private function validateRole(CompanyInterface $company, ?int $roleId, ?int $actingCustomerId = null): ?int
     {
-        if ($roleId === null) {
-            return null;
+        $role = null;
+        if ($roleId !== null) {
+            try {
+                $role = $this->roleRepository->getById($roleId);
+            } catch (NoSuchEntityException) {
+                throw new LocalizedException(__('That role no longer exists.'));
+            }
+
+            if (!$this->roleRepository->isUsableBy($role, (int)$company->getId())) {
+                throw new LocalizedException(__('That role does not belong to your company.'));
+            }
+        } elseif ($actingCustomerId !== null) {
+            $role = $this->roleRepository->getDefaultForCompany((int)$company->getId());
         }
 
-        try {
-            $role = $this->roleRepository->getById($roleId);
-        } catch (NoSuchEntityException) {
-            throw new LocalizedException(__('That role no longer exists.'));
-        }
-
-        if (!$this->roleRepository->isUsableBy($role, (int)$company->getId())) {
-            throw new LocalizedException(__('That role does not belong to your company.'));
+        if ($actingCustomerId !== null && $role !== null
+            && !$this->permissionChecker->canGrant($actingCustomerId, $company, $role->getPermissions())
+        ) {
+            throw new LocalizedException(__('You cannot give a role with permissions you do not have yourself.'));
         }
 
         return $roleId;

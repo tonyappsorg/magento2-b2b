@@ -5,7 +5,7 @@
     <head><title translate="true">Company Roles</title></head>
     <body>
         <referenceContainer name="content">
-            <block class="Tonyapps\B2b\Block\Company\Roles" name="tonyapps_b2b.company.roles"
+            <block class="Tonyapps\B2b\Block\Company\Roles" name="tonyapps_b2b.company.roles" cacheable="false"
                    template="Tonyapps_B2b::company/roles.phtml"/>
         </referenceContainer>
     </body>

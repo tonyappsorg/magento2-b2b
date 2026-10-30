@@ -5,7 +5,7 @@
     <head><title translate="true">Company Users</title></head>
     <body>
         <referenceContainer name="content">
-            <block class="Tonyapps\B2b\Block\Company\Users" name="tonyapps_b2b.company.users"
+            <block class="Tonyapps\B2b\Block\Company\Users" name="tonyapps_b2b.company.users" cacheable="false"
                    template="Tonyapps_B2b::company/users.phtml"/>
         </referenceContainer>
     </body>

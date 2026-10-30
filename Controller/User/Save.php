@@ -54,7 +54,8 @@ class Save extends AbstractCompanyAction implements HttpPostActionInterface
                 (string)($data['email'] ?? ''),
                 (string)($data['firstname'] ?? ''),
                 (string)($data['lastname'] ?? ''),
-                (int)($data['role_id'] ?? 0) ?: null
+                (int)($data['role_id'] ?? 0) ?: null,
+                $this->companyContext->getCustomerId()
             );
             $this->messageManager->addSuccessMessage(
                 __('%1 has been added to your company and emailed a link to set their password.', $data['email'] ?? '')

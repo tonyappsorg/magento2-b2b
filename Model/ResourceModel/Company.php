@@ -346,14 +346,22 @@ class Company extends AbstractDb
      * Options for a parent-company select, excluding a company's own subtree so a cycle cannot be
      * picked in the first place.
      *
+     * @param int[]|null $onlyIds limit to these companies (NULL: all)
      * @return array<int, string>
      */
-    public function getCompanyOptions(?int $excludeSubtreeOf = null): array
+    public function getCompanyOptions(?int $excludeSubtreeOf = null, ?array $onlyIds = null): array
     {
         $connection = $this->getConnection();
         $select = $connection->select()
             ->from($this->getMainTable(), [CompanyInterface::ENTITY_ID, CompanyInterface::NAME])
             ->order(CompanyInterface::NAME . ' ' . Select::SQL_ASC);
+
+        if ($onlyIds !== null) {
+            if (!$onlyIds) {
+                return [];
+            }
+            $select->where(CompanyInterface::ENTITY_ID . ' IN (?)', $onlyIds);
+        }
 
         if ($excludeSubtreeOf !== null) {
             $excluded = $this->getSubtreeIds($excludeSubtreeOf);

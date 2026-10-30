@@ -4,7 +4,7 @@
     <update handle="customer_account"/>
     <body>
         <referenceContainer name="content">
-            <block class="Tonyapps\B2b\Block\Company\Form" name="tonyapps_b2b.company.register"
+            <block class="Tonyapps\B2b\Block\Company\Form" name="tonyapps_b2b.company.register" cacheable="false"
                    template="Tonyapps_B2b::company/form.phtml">
                 <arguments>
                     <argument name="is_registration" xsi:type="boolean">true</argument>
