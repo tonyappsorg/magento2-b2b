@@ -30,6 +30,7 @@ class Permissions
     public const CREDIT_USE = 'credit_use';
     public const REQUISITION_LISTS_VIEW = 'requisition_lists_view';
     public const REQUISITION_LISTS_MANAGE = 'requisition_lists_manage';
+    public const QUOTES_REQUEST = 'quotes_request';
 
     /**
      * The one permission a company member always has: without it they could not see the company
@@ -85,6 +86,9 @@ class Permissions
             (string)__('Requisition Lists') => [
                 self::REQUISITION_LISTS_VIEW => __('View and add company requisition lists to the cart'),
                 self::REQUISITION_LISTS_MANAGE => __('Create, edit, and delete company requisition lists'),
+            ],
+            (string)__('Quotes') => [
+                self::QUOTES_REQUEST => __('Request price quotes and check out at the quoted prices'),
             ],
         ];
     }

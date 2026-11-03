@@ -85,4 +85,9 @@ class PermissionsTest extends TestCase
             $this->permissions->normalise([Permissions::REQUISITION_LISTS_MANAGE])
         );
     }
+
+    public function testQuotesRequestIsAKnownPermission(): void
+    {
+        self::assertSame([Permissions::QUOTES_REQUEST], $this->permissions->normalise([Permissions::QUOTES_REQUEST]));
+    }
 }
