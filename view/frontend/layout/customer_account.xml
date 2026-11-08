@@ -1,6 +1,8 @@
 <?xml version="1.0"?>
 <!--
-    "My Company" in the account navigation.
+    "My Company" and its sections as their own block of the account navigation, between My Account (250)
+    and My Orders (230); the other B2B modules add theirs at 235-238. Each section link needs its company permission; the delimiters and links are
+    hidden for customers outside a company.
 
     The container block is customer_account_navigation (underscores). The hyphenated
     customer-account-navigation-* names belong to its child links, not to the block itself.
@@ -9,11 +11,63 @@
       xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
     <body>
         <referenceBlock name="customer_account_navigation">
+            <block class="Tonyapps\B2b\Block\Company\Delimiter" name="customer-account-navigation-tonyapps-b2b-delimiter-top"
+                   template="Magento_Customer::account/navigation-delimiter.phtml">
+                <arguments>
+                    <argument name="sortOrder" xsi:type="number">245</argument>
+                </arguments>
+            </block>
             <block class="Tonyapps\B2b\Block\Company\Link" name="customer-account-navigation-tonyapps-b2b-link">
                 <arguments>
                     <argument name="path" xsi:type="string">b2b/company/index</argument>
                     <argument name="label" xsi:type="string" translate="true">My Company</argument>
+                    <argument name="sortOrder" xsi:type="number">244</argument>
+                </arguments>
+            </block>
+            <block class="Tonyapps\B2b\Block\Company\Link" name="customer-account-navigation-tonyapps-b2b-users-link">
+                <arguments>
+                    <argument name="path" xsi:type="string">b2b/user/index</argument>
+                    <argument name="label" xsi:type="string" translate="true">Company Users</argument>
+                    <argument name="permission" xsi:type="string">users_view</argument>
+                    <argument name="sortOrder" xsi:type="number">243</argument>
+                </arguments>
+            </block>
+            <block class="Tonyapps\B2b\Block\Company\Link" name="customer-account-navigation-tonyapps-b2b-roles-link">
+                <arguments>
+                    <argument name="path" xsi:type="string">b2b/role/index</argument>
+                    <argument name="label" xsi:type="string" translate="true">Roles and Permissions</argument>
+                    <argument name="permission" xsi:type="string">roles_view</argument>
+                    <argument name="sortOrder" xsi:type="number">242</argument>
+                </arguments>
+            </block>
+            <block class="Tonyapps\B2b\Block\Company\Link" name="customer-account-navigation-tonyapps-b2b-children-link">
+                <arguments>
+                    <argument name="path" xsi:type="string">b2b/child/index</argument>
+                    <argument name="label" xsi:type="string" translate="true">Child Companies</argument>
+                    <argument name="permission" xsi:type="string">children_view</argument>
+                    <argument name="sortOrder" xsi:type="number">241</argument>
+                </arguments>
+            </block>
+            <block class="Tonyapps\B2b\Block\Company\Link" name="customer-account-navigation-tonyapps-b2b-orders-link">
+                <arguments>
+                    <argument name="path" xsi:type="string">b2b/order/index</argument>
+                    <argument name="label" xsi:type="string" translate="true">Company Orders</argument>
+                    <argument name="permission" xsi:type="string">orders_view_company</argument>
                     <argument name="sortOrder" xsi:type="number">240</argument>
+                </arguments>
+            </block>
+            <block class="Tonyapps\B2b\Block\Company\Link" name="customer-account-navigation-tonyapps-b2b-credit-link">
+                <arguments>
+                    <argument name="path" xsi:type="string">b2b/credit/index</argument>
+                    <argument name="label" xsi:type="string" translate="true">Store Credit</argument>
+                    <argument name="permission" xsi:type="string">credit_view</argument>
+                    <argument name="sortOrder" xsi:type="number">239</argument>
+                </arguments>
+            </block>
+            <block class="Tonyapps\B2b\Block\Company\Delimiter" name="customer-account-navigation-tonyapps-b2b-delimiter-bottom"
+                   template="Magento_Customer::account/navigation-delimiter.phtml">
+                <arguments>
+                    <argument name="sortOrder" xsi:type="number">234</argument>
                 </arguments>
             </block>
         </referenceBlock>

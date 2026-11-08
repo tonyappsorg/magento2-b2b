@@ -16,7 +16,8 @@ use Tonyapps\B2b\Model\CompanyContext;
  * them regardless of the sortOrder argument.
  *
  * Hidden for customers who are not in a company, so the account menu of a normal shopper is
- * unchanged by installing this module.
+ * unchanged by installing this module. With a "permission" argument the link also needs that
+ * company permission, matching the buttons on the My Company page.
  */
 class Link extends SortLink
 {
@@ -32,6 +33,11 @@ class Link extends SortLink
     protected function _toHtml(): string
     {
         if (!$this->companyContext->isEnabled() || $this->companyContext->getCompany() === null) {
+            return '';
+        }
+
+        $permission = (string) $this->getData('permission');
+        if ($permission !== '' && !$this->companyContext->isAllowed($permission)) {
             return '';
         }
 
