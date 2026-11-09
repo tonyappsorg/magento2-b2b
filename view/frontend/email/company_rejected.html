@@ -4,11 +4,27 @@
 "var admin_name":"Company Administrator"
 } @-->
 {{template config_path="design/email/header_template"}}
-
-<p>{{trans "%name," name=$admin_name}}</p>
-
-<p>{{trans "We are unable to approve the company account request for %company at this time." company=$company_name}}</p>
-
-<p>{{trans "Your personal account is unaffected and you can continue to shop as usual. Please contact us if you would like to discuss this."}}</p>
-
+<table width="100%" cellpadding="0" cellspacing="0" role="presentation">
+    <tr>
+        <td style="padding-bottom:20px;">
+            <p style="margin:0 0 8px;font-size:12px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:#666666;">{{trans "Company account"}}</p>
+            <h1 style="margin:0 0 12px;font-size:24px;font-weight:600;">{{trans "About your company account request"}}</h1>
+            <p style="margin:0;">{{trans "Hi %name, we are unable to approve the company account request for %company at this time." name=$admin_name company=$company_name}}</p>
+        </td>
+    </tr>
+    <tr>
+        <td style="padding-bottom:24px;">
+            <table width="100%" cellpadding="0" cellspacing="0" role="presentation">
+                <tr>
+                    <td style="padding:16px 20px;background:#f8f8f8;border-left:4px solid #cccccc;border-radius:2px;"><p style="margin:0;">{{trans "Your personal account is unaffected and you can continue to shop as usual."}}</p></td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td style="padding-top:16px;border-top:1px solid #e5e5e5;">
+            <p style="margin:0;font-size:12px;color:#999999;">{{trans "If you would like to discuss this, just reply to this email."}}</p>
+        </td>
+    </tr>
+</table>
 {{template config_path="design/email/footer_template"}}

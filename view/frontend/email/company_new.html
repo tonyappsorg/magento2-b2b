@@ -7,17 +7,45 @@
 "var admin_url":"Link to the company in the admin panel"
 } @-->
 {{template config_path="design/email/header_template"}}
-
-<p>{{trans "A new company has registered on the storefront and is waiting for approval."}}</p>
-
-<table class="message-details">
-    <tr><td>{{trans "Company"}}</td><td>{{var company_name}}</td></tr>
-    <tr><td>{{trans "Company email"}}</td><td>{{var company_email}}</td></tr>
-    <tr><td>{{trans "Administrator"}}</td><td>{{var admin_name}} &lt;{{var admin_email}}&gt;</td></tr>
+<table width="100%" cellpadding="0" cellspacing="0" role="presentation">
+    <tr>
+        <td style="padding-bottom:20px;">
+            <p style="margin:0 0 8px;font-size:12px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:#f5a623;">{{trans "New company registration"}}</p>
+            <h1 style="margin:0 0 12px;font-size:24px;font-weight:600;">{{trans "%company is waiting for approval" company=$company_name}}</h1>
+            <p style="margin:0;">{{trans "A new company has registered on the storefront."}}</p>
+        </td>
+    </tr>
+    <tr>
+        <td style="padding-bottom:24px;">
+            <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="background:#f8f8f8;border:1px solid #e5e5e5;border-radius:4px;">
+                <tr>
+                    <td style="padding:12px 16px;border-bottom:1px solid #e5e5e5;color:#666666;width:40%;">{{trans "Company"}}</td>
+                    <td style="padding:12px 16px;border-bottom:1px solid #e5e5e5;font-weight:600;">{{var company_name}}</td>
+                </tr>
+                <tr>
+                    <td style="padding:12px 16px;border-bottom:1px solid #e5e5e5;color:#666666;width:40%;">{{trans "Company email"}}</td>
+                    <td style="padding:12px 16px;border-bottom:1px solid #e5e5e5;font-weight:600;">{{var company_email}}</td>
+                </tr>
+                <tr>
+                    <td style="padding:12px 16px;border-bottom:1px solid #e5e5e5;color:#666666;width:40%;">{{trans "Administrator"}}</td>
+                    <td style="padding:12px 16px;border-bottom:1px solid #e5e5e5;font-weight:600;">{{var admin_name}}</td>
+                </tr>
+                <tr>
+                    <td style="padding:12px 16px;color:#666666;width:40%;">{{trans "Administrator email"}}</td>
+                    <td style="padding:12px 16px;font-weight:600;">{{var admin_email}}</td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td align="center" style="padding:8px 0 24px;">
+            <a href="{{var admin_url}}" style="display:inline-block;padding:14px 32px;background:#1979c3;color:#ffffff;text-decoration:none;font-size:16px;font-weight:600;border-radius:3px;">{{trans "Review this company"}}</a>
+        </td>
+    </tr>
+    <tr>
+        <td style="padding-top:16px;border-top:1px solid #e5e5e5;">
+            <p style="margin:0;font-size:12px;color:#999999;">{{trans "Until it is approved, its users keep the default customer group and do not get company pricing."}}</p>
+        </td>
+    </tr>
 </table>
-
-<p><a href="{{var admin_url}}">{{trans "Review this company"}}</a></p>
-
-<p>{{trans "Until it is approved, its users keep the default customer group and do not get company pricing."}}</p>
-
 {{template config_path="design/email/footer_template"}}

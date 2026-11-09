@@ -568,3 +568,9 @@ causes, both pre-existing and unrelated to Tonyapps_B2b:
   needs `Tonyapps_B2b::companies`; the "new company" email links to the admin edit page.
 - **Fewer queries**: Company Orders loads only the subtree's company names, role member counts are one query,
   and the users list loads once per render.
+
+## 2026-11-09 email redesign
+
+The company emails (new registration to the store, approved, rejected) use the store's email frame with a heading,
+a details table or a highlighted box, and a button, like the other Tonyapps emails. Variables are unchanged.
+
