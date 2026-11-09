@@ -574,3 +574,19 @@ causes, both pre-existing and unrelated to Tonyapps_B2b:
 The company emails (new registration to the store, approved, rejected) use the store's email frame with a heading,
 a details table or a highlighted box, and a button, like the other Tonyapps emails. Variables are unchanged.
 
+## Emails
+
+Screenshots of the emails as sent (Luma theme, 2026-11-09). Source images are in `docs/emails/`.
+
+**New company registration (to the store)**
+
+![New company registration (to the store)](docs/emails/company-new.png)
+
+**Company account approved**
+
+![Company account approved](docs/emails/company-approved.png)
+
+**Company account request declined**
+
+![Company account request declined](docs/emails/company-rejected.png)
+
