@@ -47,13 +47,19 @@ $canManage = $block->canManage();
                                             data-role-edit="<?= (int)$role->getId() ?>">
                                         <span><?= $escaper->escapeHtml(__('Edit')) ?></span>
                                     </button>
-                                    <form action="<?= $escaper->escapeUrl($block->getDeleteUrl($role)) ?>"
-                                          method="post" style="display:inline;">
-                                        <?= $block->getBlockHtml('formkey') ?>
-                                        <button type="submit" class="action delete">
-                                            <span><?= $escaper->escapeHtml(__('Delete')) ?></span>
-                                        </button>
-                                    </form>
+                                    <?php /* Core's data-post widget asks for confirmation, then posts with the form key. */ ?>
+                                    <button type="button" class="action delete" data-post="<?= $escaper->escapeHtmlAttr(json_encode([
+                                        'action' => $block->getDeleteUrl($role),
+                                        'data' => [
+                                            'confirmation' => true,
+                                            'confirmationMessage' => (string)__(
+                                                'Delete the role "%1"? Its members fall back to the company default role.',
+                                                $role->getRoleName()
+                                            ),
+                                        ],
+                                    ])) ?>">
+                                        <span><?= $escaper->escapeHtml(__('Delete')) ?></span>
+                                    </button>
                                 </td>
                             <?php endif; ?>
                         </tr>

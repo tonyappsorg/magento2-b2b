@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Tonyapps\B2b\Block\Company;
 
+use Magento\Directory\Model\CountryFactory;
 use Magento\Framework\View\Element\Template;
 use Magento\Framework\View\Element\Template\Context;
 use Tonyapps\B2b\Api\Data\CompanyInterface;
@@ -19,6 +20,7 @@ class Dashboard extends Template
         Context $context,
         private readonly CompanyContext $companyContext,
         private readonly Status $statusSource,
+        private readonly CountryFactory $countryFactory,
         array $data = []
     ) {
         parent::__construct($context, $data);
@@ -119,7 +121,8 @@ class Dashboard extends Template
 
         $country = (string)$company->getData(CompanyInterface::COUNTRY_ID);
         if ($country !== '') {
-            $lines[] = $country;
+            // "United States" rather than "US", in the store's locale.
+            $lines[] = (string)$this->countryFactory->create()->loadByCode($country)->getName() ?: $country;
         }
 
         return array_values($lines);

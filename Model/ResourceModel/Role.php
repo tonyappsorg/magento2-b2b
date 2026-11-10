@@ -84,6 +84,22 @@ class Role extends AbstractDb
     }
 
     /**
+     * Members of a company with no role of their own, so the company's default role applies to them.
+     * The company administrator has full access and is left out.
+     */
+    public function countMembersWithoutRole(int $companyId, int $adminCustomerId): int
+    {
+        $connection = $this->getConnection();
+        $select = $connection->select()
+            ->from($this->getTable(CompanyCustomer::TABLE), new \Zend_Db_Expr('COUNT(*)'))
+            ->where('company_id = ?', $companyId)
+            ->where('role_id IS NULL')
+            ->where('customer_id <> ?', $adminCustomerId);
+
+        return (int)$connection->fetchOne($select);
+    }
+
+    /**
      * How many members hold each of these roles, in one query; a role nobody holds is left out.
      *
      * @param int[] $roleIds

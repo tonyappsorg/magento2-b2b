@@ -4,3 +4,18 @@
 .form-company-child {
     margin-top: 40px;
 }
+
+// Luma draws a separator after every action in a table's actions cell except the last one; here the
+// actions are buttons, so the line ended up inside the Edit button.
+.account .data.table.table-company-users,
+.account .data.table.table-company-roles,
+.account .data.table.table-company-children {
+    // More specific than Luma's ".account .data.table .col.actions .action:after".
+    .col.actions .action:after {
+        display: none;
+    }
+
+    .col.actions .action + .action {
+        margin-left: 8px;
+    }
+}

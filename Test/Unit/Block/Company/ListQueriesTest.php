@@ -74,6 +74,35 @@ class ListQueriesTest extends TestCase
         self::assertSame(0, $block->getMemberCount($roles[1]));
     }
 
+    public function testTheDefaultRoleCountsMembersWithoutARoleOfTheirOwn(): void
+    {
+        $company = $this->createMock(CompanyInterface::class);
+        $company->method('getId')->willReturn(4);
+        $company->method('getAdminCustomerId')->willReturn(1);
+        $companyContext = $this->createMock(CompanyContext::class);
+        $companyContext->method('getCompany')->willReturn($company);
+        $default = $this->createMock(RoleInterface::class);
+        $default->method('getId')->willReturn(3);
+        $default->method('isDefault')->willReturn(true);
+        $other = $this->createMock(RoleInterface::class);
+        $other->method('getId')->willReturn(5);
+        $roleRepository = $this->createMock(RoleRepositoryInterface::class);
+        $roleRepository->method('getByCompanyId')->willReturn([$default, $other]);
+        $roleResource = $this->createMock(RoleResource::class);
+        $roleResource->method('countMembersByRole')->willReturn([3 => 1, 5 => 2]);
+        $roleResource->expects(self::once())->method('countMembersWithoutRole')->with(4, 1)->willReturn(2);
+
+        $block = $this->objectManager->getObject(Roles::class, [
+            'companyContext' => $companyContext,
+            'roleRepository' => $roleRepository,
+            'roleResource' => $roleResource,
+        ]);
+
+        self::assertSame(3, $block->getMemberCount($default)); // 1 assigned + 2 without a role
+        self::assertSame(2, $block->getMemberCount($other));
+        self::assertSame(3, $block->getMemberCount($default)); // counted once
+    }
+
     public function testUsersAreLoadedOncePerRender(): void
     {
         $user = $this->createMock(CustomerInterface::class);

@@ -26,6 +26,8 @@ class Roles extends Template
      */
     private ?array $memberCounts = null;
 
+    private ?int $membersWithoutRole = null;
+
     public function __construct(
         Context $context,
         private readonly CompanyContext $companyContext,
@@ -67,9 +69,11 @@ class Roles extends Template
 
     public function getPermissionLabels(RoleInterface $role): string
     {
+        // Keys are the permission codes; the values are their labels.
         $labels = array_filter(
             $this->permissions->getLabels(),
-            static fn(string $permission): bool => $role->hasPermission($permission)
+            static fn(string $permission): bool => $role->hasPermission($permission),
+            ARRAY_FILTER_USE_KEY
         );
 
         return $labels ? implode(', ', array_values($labels)) : (string)__('Nothing beyond seeing the company');
@@ -82,7 +86,17 @@ class Roles extends Template
             array_map(static fn(RoleInterface $role): int => (int)$role->getId(), $this->getRoles())
         );
 
-        return $this->memberCounts[(int)$role->getId()] ?? 0;
+        $count = $this->memberCounts[(int)$role->getId()] ?? 0;
+        if ($role->isDefault() && ($company = $this->companyContext->getCompany())) {
+            // Members without a role of their own get the default one.
+            $this->membersWithoutRole ??= $this->roleResource->countMembersWithoutRole(
+                (int)$company->getId(),
+                (int)$company->getAdminCustomerId()
+            );
+            $count += $this->membersWithoutRole;
+        }
+
+        return $count;
     }
 
     public function getSaveUrl(): string

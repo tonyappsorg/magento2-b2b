@@ -574,6 +574,20 @@ causes, both pre-existing and unrelated to Tonyapps_B2b:
 The company emails (new registration to the store, approved, rejected) use the store's email frame with a heading,
 a details table or a highlighted box, and a button, like the other Tonyapps emails. Variables are unchanged.
 
+## 2026-11-09 QA fix
+
+The storefront role list (**Roles and Permissions**) showed "Nothing beyond seeing the company" for every role:
+`array_filter()` handed the permission labels to the check instead of the permission codes. It now lists each
+role's permissions. The admin role grid was not affected.
+
+Also from the same QA pass:
+
+- **Remove** (user) and **Delete** (role) ask for confirmation first (core's `data-post` confirm modal).
+- The role list's **Users** count includes members without a role of their own on the default role (the company
+  administrator, who has full access, is left out).
+- The company page shows the country's name ("United States") instead of its code.
+- The Edit button in the role list no longer shows Luma's action separator line.
+
 ## Emails
 
 Screenshots of the emails as sent (Luma theme, 2026-11-09). Source images are in `docs/emails/`.

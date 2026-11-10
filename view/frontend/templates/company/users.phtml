@@ -68,12 +68,19 @@ $roles = $block->getRoles();
                             <?php if ($canManage): ?>
                                 <td class="col actions">
                                     <?php if (!$block->isAdministrator($user)): ?>
-                                        <form action="<?= $escaper->escapeUrl($block->getRemoveUrl($user)) ?>" method="post">
-                                            <?= $block->getBlockHtml('formkey') ?>
-                                            <button type="submit" class="action delete">
-                                                <span><?= $escaper->escapeHtml(__('Remove')) ?></span>
-                                            </button>
-                                        </form>
+                                        <?php /* Core's data-post widget asks for confirmation, then posts with the form key. */ ?>
+                                        <button type="button" class="action delete" data-post="<?= $escaper->escapeHtmlAttr(json_encode([
+                                            'action' => $block->getRemoveUrl($user),
+                                            'data' => [
+                                                'confirmation' => true,
+                                                'confirmationMessage' => (string)__(
+                                                    'Remove %1 from your company? They keep their customer account but lose access to the company.',
+                                                    trim($user->getFirstname() . ' ' . $user->getLastname())
+                                                ),
+                                            ],
+                                        ])) ?>">
+                                            <span><?= $escaper->escapeHtml(__('Remove')) ?></span>
+                                        </button>
                                     <?php endif; ?>
                                 </td>
                             <?php endif; ?>
