@@ -604,3 +604,9 @@ Screenshots of the emails as sent (Luma theme, 2026-11-09). Source images are in
 
 ![Company account request declined](docs/emails/company-rejected.png)
 
+
+## Redesigning the emails
+
+This module's emails can be redesigned visually with the [Email Designer](https://github.com/tonyappsorg/magento2-email-designer) (`Tonyapps_EmailDesigner`): open **Marketing › Communications ›
+Email Designer**, start a design for the email and save it. Then pick the saved design in this module's email
+template setting under **Stores › Configuration**. The default template is used until a design is picked.
