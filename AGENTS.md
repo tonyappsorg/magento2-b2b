@@ -178,6 +178,9 @@ allow/deny, mirroring Magento's ACL rule table) was **not built** — see Decisi
 - Email template IDs are already in core's config-path form, so EmailDesigner designs can be picked in the settings.
   Emails are sent from the default store view (approvals happen in admin, which has no usable frontend config);
   failures are logged, never thrown.
+- Email Designer (`etc/di.xml`, `BlockPool`): block `b2b_company_details` (details table, new-company email); starter
+  designs in `view/adminhtml/email_designer/company_{new,approved,rejected}.mjml` (the approved/rejected boxes are
+  editable text, not blocks).
 
 **Admin ACL** (`etc/acl.xml`): `Magento_Customer::customer` › `Tonyapps_B2b::companies` (Companies) ›
 `Tonyapps_B2b::credit` (Adjust Store Credit); `Magento_Config::config` › `Tonyapps_B2b::config`. Assigning a company
@@ -339,6 +342,10 @@ vendor/bin/phpunit -c dev/tests/unit/phpunit.xml.dist app/code/Tonyapps/B2b/Test
 - Email screenshots live in `docs/emails/` (export-ignored from the Composer package via `.gitattributes`).
 
 ## Change history
+
+### 2026-11-13 Email Designer blocks and starter designs
+Registered the new-company details table as an Email Designer block and a starter design for each of the three
+company emails, a copy of the built-in template. No dependency on `Tonyapps_EmailDesigner`.
 
 ### 2026-11-13 package metadata
 `composer.json` requires eav, email, payment, sales and theme, which the code uses. `module.xml` sequences

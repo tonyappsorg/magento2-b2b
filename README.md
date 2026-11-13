@@ -82,7 +82,8 @@ Emails as sent (Luma theme, 2026-11-09).
 The emails can be redesigned visually with the [Email Designer](https://github.com/tonyappsorg/magento2-email-designer)
 (`Tonyapps_EmailDesigner`): open **Marketing › Communications › Email Designer**, start a design for the email and
 save it. Then pick the saved design in this module's email template settings under **Stores › Configuration ›
-Tonyapps › B2B Company Account › Emails**. The default template is used until a design is picked.
+Tonyapps › B2B Company Account › Emails**. The default template is used until a design is picked. A new design starts
+from a ready-made copy of the module's email, with its company details table as a drag-and-drop block.
 
 ## Good to know
 
