@@ -314,8 +314,6 @@ Other limitations:
 - Hyvä not supported (see WORKPLAN item 5).
 - Per WORKPLAN QA log 2026-11-10: child companies created from the storefront can't be deleted there (e2e runs leave
   "E2E Branch" rows; clean with SQL).
-- `composer.json` requires only framework/backend/config/customer/directory/store/ui although the code uses
-  sales/quote/payment/checkout (not changed).
 
 Known blockers outside this module (`setup:di:compile` failed for the whole project, so production deployment did too; developer mode doesn't need it; both causes pre-existing):
 1. `Tonyapps_ShippingRules/Block/Adminhtml/Rule/Import.php` redeclared inherited `$formKey` as readonly — fatal on
@@ -341,6 +339,11 @@ vendor/bin/phpunit -c dev/tests/unit/phpunit.xml.dist app/code/Tonyapps/B2b/Test
 - Email screenshots live in `docs/emails/` (export-ignored from the Composer package via `.gitattributes`).
 
 ## Change history
+
+### 2026-11-13 package metadata
+`composer.json` requires eav, email, payment, sales and theme, which the code uses. `module.xml` sequences
+`Magento_Sales` (the module redefines Sales' order-grid virtual type) and `Magento_Payment`. Quote and checkout are
+only reached through events, so they are not required.
 
 ### 2026-11-09 QA fix
 - Storefront **Roles and Permissions** showed "Nothing beyond seeing the company" for every role: `array_filter()`
