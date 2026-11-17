@@ -93,7 +93,8 @@ The designer can preview and test-send the design with a real company from your 
 - Added users exist immediately — there is no "invited, not yet accepted" state.
 - Companies are global across websites, and store credit is kept in the base currency; stores running different base
   currencies per website are not supported.
-- Built for the **Luma** storefront and checkout; Hyvä and custom one-step checkouts are not supported yet.
+- Company account pages are styled for **Luma and Hyvä**. On Hyvä, checkout uses the configured checkout integration
+  (the DDEV Hyvä store uses Magento's Luma checkout fallback); custom one-step checkout integrations are not covered.
 - No REST or GraphQL API, and no sales representative per company.
 - Built from scratch for Open Source — there is no migration path to Adobe Commerce B2B, and the two cannot run
   together.

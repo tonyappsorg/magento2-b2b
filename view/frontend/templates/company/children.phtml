@@ -20,9 +20,9 @@ $fields = [
 <div class="block block-company-children">
     <div class="block-content">
         <?php if ($children): ?>
-            <div class="table-wrapper">
-                <table class="data table table-company-children">
-                    <caption class="table-caption"><?= $escaper->escapeHtml(__('Child Companies')) ?></caption>
+            <div class="table-wrapper card mb-4">
+                <table class="data table table-company-children w-full">
+                    <caption class="sr-only"><?= $escaper->escapeHtml(__('Child Companies')) ?></caption>
                     <thead>
                         <tr>
                             <th scope="col" class="col name"><?= $escaper->escapeHtml(__('Company')) ?></th>
@@ -48,7 +48,7 @@ $fields = [
                             </td>
                             <?php if ($canManage): ?>
                                 <td class="col actions">
-                                    <button type="button" class="action edit"
+                                    <button type="button" class="action edit btn btn-secondary"
                                             data-child-edit="<?= (int)$child->getId() ?>">
                                         <span><?= $escaper->escapeHtml(__('Edit')) ?></span>
                                     </button>
@@ -81,7 +81,7 @@ $fields = [
                 <div class="field required">
                     <label class="label" for="child_name"><span><?= $escaper->escapeHtml(__('Company Name')) ?></span></label>
                     <div class="control">
-                        <input type="text" name="company[name]" id="child_name" class="input-text"
+                        <input type="text" name="company[name]" id="child_name" class="input-text form-input w-full"
                                data-validate="{required:true}">
                     </div>
                 </div>
@@ -94,7 +94,7 @@ $fields = [
                         <div class="control">
                             <input type="<?= $code === 'email' ? 'email' : 'text' ?>"
                                    name="company[<?= $escaper->escapeHtmlAttr($code) ?>]"
-                                   id="child_<?= $escaper->escapeHtmlAttr($code) ?>" class="input-text">
+                                   id="child_<?= $escaper->escapeHtmlAttr($code) ?>" class="input-text form-input w-full">
                         </div>
                     </div>
                 <?php endforeach; ?>
@@ -102,14 +102,14 @@ $fields = [
                 <div class="field">
                     <label class="label" for="child_street"><span><?= $escaper->escapeHtml(__('Street Address')) ?></span></label>
                     <div class="control">
-                        <textarea name="company[street]" id="child_street" class="input-text" rows="2"></textarea>
+                        <textarea name="company[street]" id="child_street" class="input-text form-input w-full" rows="2"></textarea>
                     </div>
                 </div>
 
                 <div class="field">
                     <label class="label" for="child_country_id"><span><?= $escaper->escapeHtml(__('Country')) ?></span></label>
                     <div class="control">
-                        <select name="company[country_id]" id="child_country_id" class="select">
+                        <select name="company[country_id]" id="child_country_id" class="select form-select w-full">
                             <option value=""><?= $escaper->escapeHtml(__('Please select')) ?></option>
                             <?php foreach ($block->getCountryOptions() as $option): ?>
                                 <option value="<?= $escaper->escapeHtmlAttr($option['value']) ?>">
@@ -127,15 +127,15 @@ $fields = [
 
             <div class="actions-toolbar">
                 <div class="primary">
-                    <button type="submit" class="action save primary">
+                    <button type="submit" class="action save primary btn btn-primary">
                         <span><?= $escaper->escapeHtml(__('Save Company')) ?></span>
                     </button>
                 </div>
                 <div class="secondary">
-                    <button type="button" class="action clear" id="child-form-reset" style="display:none;">
+                    <button type="button" class="action clear btn btn-secondary" id="child-form-reset" style="display:none;">
                         <span><?= $escaper->escapeHtml(__('Cancel')) ?></span>
                     </button>
-                    <a class="action back" href="<?= $escaper->escapeUrl($block->getBackUrl()) ?>">
+                    <a class="action back btn btn-secondary" href="<?= $escaper->escapeUrl($block->getBackUrl()) ?>">
                         <span><?= $escaper->escapeHtml(__('Back')) ?></span>
                     </a>
                 </div>

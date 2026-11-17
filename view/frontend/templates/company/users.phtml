@@ -12,9 +12,9 @@ $roles = $block->getRoles();
 <div class="block block-company-users">
     <div class="block-content">
         <?php if ($users): ?>
-            <div class="table-wrapper">
-                <table class="data table table-company-users">
-                    <caption class="table-caption"><?= $escaper->escapeHtml(__('Company Users')) ?></caption>
+            <div class="table-wrapper card mb-4">
+                <table class="data table table-company-users w-full">
+                    <caption class="sr-only"><?= $escaper->escapeHtml(__('Company Users')) ?></caption>
                     <thead>
                         <tr>
                             <th scope="col" class="col name"><?= $escaper->escapeHtml(__('Name')) ?></th>
@@ -46,7 +46,7 @@ $roles = $block->getRoles();
                                     <form action="<?= $escaper->escapeUrl($block->getSetRoleUrl($user)) ?>"
                                           method="post" class="form-user-role">
                                         <?= $block->getBlockHtml('formkey') ?>
-                                        <select name="role_id" class="select" onchange="this.form.submit();">
+                                        <select name="role_id" class="select form-select w-full" onchange="this.form.submit();">
                                             <option value=""><?= $escaper->escapeHtml(__('Company default')) ?></option>
                                             <?php $current = $block->getRoleId($user); ?>
                                             <?php foreach ($roles as $role): ?>
@@ -57,7 +57,7 @@ $roles = $block->getRoles();
                                             <?php endforeach; ?>
                                         </select>
                                         <noscript>
-                                            <button type="submit" class="action"><span><?= $escaper->escapeHtml(__('Set')) ?></span></button>
+                                            <button type="submit" class="action btn btn-secondary"><span><?= $escaper->escapeHtml(__('Set')) ?></span></button>
                                         </noscript>
                                     </form>
                                 <?php else: ?>
@@ -69,7 +69,7 @@ $roles = $block->getRoles();
                                 <td class="col actions">
                                     <?php if (!$block->isAdministrator($user)): ?>
                                         <?php /* Core's data-post widget asks for confirmation, then posts with the form key. */ ?>
-                                        <button type="button" class="action delete" data-post="<?= $escaper->escapeHtmlAttr(json_encode([
+                                        <button type="button" class="action delete btn btn-secondary" data-post="<?= $escaper->escapeHtmlAttr(json_encode([
                                             'action' => $block->getRemoveUrl($user),
                                             'data' => [
                                                 'confirmation' => true,
@@ -104,21 +104,21 @@ $roles = $block->getRoles();
             <div class="field required">
                 <label class="label" for="user_firstname"><span><?= $escaper->escapeHtml(__('First Name')) ?></span></label>
                 <div class="control">
-                    <input type="text" name="user[firstname]" id="user_firstname" class="input-text"
+                    <input type="text" name="user[firstname]" id="user_firstname" class="input-text form-input w-full"
                            data-validate="{required:true}">
                 </div>
             </div>
             <div class="field required">
                 <label class="label" for="user_lastname"><span><?= $escaper->escapeHtml(__('Last Name')) ?></span></label>
                 <div class="control">
-                    <input type="text" name="user[lastname]" id="user_lastname" class="input-text"
+                    <input type="text" name="user[lastname]" id="user_lastname" class="input-text form-input w-full"
                            data-validate="{required:true}">
                 </div>
             </div>
             <div class="field required">
                 <label class="label" for="user_email"><span><?= $escaper->escapeHtml(__('Email')) ?></span></label>
                 <div class="control">
-                    <input type="email" name="user[email]" id="user_email" class="input-text"
+                    <input type="email" name="user[email]" id="user_email" class="input-text form-input w-full"
                            data-validate="{required:true, 'validate-email':true}">
                 </div>
             </div>
@@ -127,7 +127,7 @@ $roles = $block->getRoles();
                 <div class="field">
                     <label class="label" for="user_role_id"><span><?= $escaper->escapeHtml(__('Role')) ?></span></label>
                     <div class="control">
-                        <select name="user[role_id]" id="user_role_id" class="select">
+                        <select name="user[role_id]" id="user_role_id" class="select form-select w-full">
                             <option value=""><?= $escaper->escapeHtml(__('Company default')) ?></option>
                             <?php foreach ($roles as $role): ?>
                                 <option value="<?= (int)$role->getId() ?>">
@@ -146,12 +146,12 @@ $roles = $block->getRoles();
 
         <div class="actions-toolbar">
             <div class="primary">
-                <button type="submit" class="action save primary">
+                <button type="submit" class="action save primary btn btn-primary">
                     <span><?= $escaper->escapeHtml(__('Add User')) ?></span>
                 </button>
             </div>
             <div class="secondary">
-                <a class="action back" href="<?= $escaper->escapeUrl($block->getBackUrl()) ?>">
+                <a class="action back btn btn-secondary" href="<?= $escaper->escapeUrl($block->getBackUrl()) ?>">
                     <span><?= $escaper->escapeHtml(__('Back')) ?></span>
                 </a>
             </div>

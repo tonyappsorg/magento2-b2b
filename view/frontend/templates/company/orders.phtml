@@ -11,9 +11,9 @@ $companyNames = $block->getCompanyNames();
 <div class="block block-company-orders">
     <div class="block-content">
         <?php if (count($orders)): ?>
-            <div class="table-wrapper orders-history">
-                <table class="data table table-order-items history">
-                    <caption class="table-caption"><?= $escaper->escapeHtml(__('Company Orders')) ?></caption>
+            <div class="table-wrapper orders-history card mb-4">
+                <table class="data table table-order-items history w-full">
+                    <caption class="sr-only"><?= $escaper->escapeHtml(__('Company Orders')) ?></caption>
                     <thead>
                         <tr>
                             <th scope="col" class="col id"><?= $escaper->escapeHtml(__('Order #')) ?></th>
@@ -43,7 +43,7 @@ $companyNames = $block->getCompanyNames();
                                 <?= $escaper->escapeHtml($order->getStatusLabel()) ?>
                             </td>
                             <td class="col actions">
-                                <a href="<?= $escaper->escapeUrl($block->getViewUrl($order)) ?>" class="action view">
+                                <a href="<?= $escaper->escapeUrl($block->getViewUrl($order)) ?>" class="action view btn btn-secondary">
                                     <span><?= $escaper->escapeHtml(__('View Order')) ?></span>
                                 </a>
                             </td>
@@ -62,7 +62,7 @@ $companyNames = $block->getCompanyNames();
 
     <div class="actions-toolbar">
         <div class="secondary">
-            <a class="action back" href="<?= $escaper->escapeUrl($block->getBackUrl()) ?>">
+            <a class="action back btn btn-secondary" href="<?= $escaper->escapeUrl($block->getBackUrl()) ?>">
                 <span><?= $escaper->escapeHtml(__('Back')) ?></span>
             </a>
         </div>

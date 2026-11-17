@@ -25,7 +25,7 @@ $fields = [
         <div class="field required">
             <label class="label" for="company_name"><span><?= $escaper->escapeHtml(__('Company Name')) ?></span></label>
             <div class="control">
-                <input type="text" name="company[name]" id="company_name" class="input-text"
+                <input type="text" name="company[name]" id="company_name" class="input-text form-input w-full"
                        value="<?= $escaper->escapeHtmlAttr($block->getFieldValue('name')) ?>"
                        data-validate="{required:true}">
             </div>
@@ -40,7 +40,7 @@ $fields = [
                     <input type="<?= $code === 'email' ? 'email' : 'text' ?>"
                            name="company[<?= $escaper->escapeHtmlAttr($code) ?>]"
                            id="company_<?= $escaper->escapeHtmlAttr($code) ?>"
-                           class="input-text"
+                           class="input-text form-input w-full"
                            <?= $code === 'email' ? 'data-validate="{\'validate-email\':true}"' : '' ?>
                            value="<?= $escaper->escapeHtmlAttr($block->getFieldValue($code)) ?>">
                 </div>
@@ -54,7 +54,7 @@ $fields = [
         <div class="field">
             <label class="label" for="company_street"><span><?= $escaper->escapeHtml(__('Street Address')) ?></span></label>
             <div class="control">
-                <textarea name="company[street]" id="company_street" class="input-text" rows="2"
+                <textarea name="company[street]" id="company_street" class="input-text form-input w-full" rows="2"
                 ><?= $escaper->escapeHtml($block->getFieldValue('street')) ?></textarea>
             </div>
         </div>
@@ -62,7 +62,7 @@ $fields = [
         <div class="field">
             <label class="label" for="company_city"><span><?= $escaper->escapeHtml(__('City')) ?></span></label>
             <div class="control">
-                <input type="text" name="company[city]" id="company_city" class="input-text"
+                <input type="text" name="company[city]" id="company_city" class="input-text form-input w-full"
                        value="<?= $escaper->escapeHtmlAttr($block->getFieldValue('city')) ?>">
             </div>
         </div>
@@ -70,7 +70,7 @@ $fields = [
         <div class="field">
             <label class="label" for="company_region"><span><?= $escaper->escapeHtml(__('State / Province')) ?></span></label>
             <div class="control">
-                <input type="text" name="company[region]" id="company_region" class="input-text"
+                <input type="text" name="company[region]" id="company_region" class="input-text form-input w-full"
                        value="<?= $escaper->escapeHtmlAttr($block->getFieldValue('region')) ?>">
             </div>
         </div>
@@ -78,7 +78,7 @@ $fields = [
         <div class="field">
             <label class="label" for="company_postcode"><span><?= $escaper->escapeHtml(__('Zip / Postal Code')) ?></span></label>
             <div class="control">
-                <input type="text" name="company[postcode]" id="company_postcode" class="input-text"
+                <input type="text" name="company[postcode]" id="company_postcode" class="input-text form-input w-full"
                        value="<?= $escaper->escapeHtmlAttr($block->getFieldValue('postcode')) ?>">
             </div>
         </div>
@@ -86,7 +86,7 @@ $fields = [
         <div class="field">
             <label class="label" for="company_country_id"><span><?= $escaper->escapeHtml(__('Country')) ?></span></label>
             <div class="control">
-                <select name="company[country_id]" id="company_country_id" class="select">
+                <select name="company[country_id]" id="company_country_id" class="select form-select w-full">
                     <option value=""><?= $escaper->escapeHtml(__('Please select')) ?></option>
                     <?php $selected = $block->getFieldValue('country_id'); ?>
                     <?php foreach ($block->getCountryOptions() as $option): ?>
@@ -108,12 +108,12 @@ $fields = [
 
     <div class="actions-toolbar">
         <div class="primary">
-            <button type="submit" class="action save primary">
+            <button type="submit" class="action save primary btn btn-primary">
                 <span><?= $escaper->escapeHtml($block->isRegistration() ? __('Register Company') : __('Save')) ?></span>
             </button>
         </div>
         <div class="secondary">
-            <a class="action back" href="<?= $escaper->escapeUrl($block->getBackUrl()) ?>">
+            <a class="action back btn btn-secondary" href="<?= $escaper->escapeUrl($block->getBackUrl()) ?>">
                 <span><?= $escaper->escapeHtml(__('Back')) ?></span>
             </a>
         </div>

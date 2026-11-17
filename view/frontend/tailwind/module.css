@@ -1,0 +1,41 @@
+@source "../templates/**/*.phtml";
+
+.block-company-users .table-wrapper,
+.block-company-roles .table-wrapper,
+.block-company-children .table-wrapper,
+.block-company-orders .table-wrapper,
+.block-company-credit .table-wrapper {
+    @apply overflow-x-auto;
+}
+
+.block-company-users table.data.table,
+.block-company-roles table.data.table,
+.block-company-children table.data.table,
+.block-company-orders table.data.table,
+.block-company-credit table.data.table {
+    @apply min-w-full border-collapse text-left;
+}
+
+.block-company-users table.data.table th,
+.block-company-roles table.data.table th,
+.block-company-children table.data.table th,
+.block-company-orders table.data.table th,
+.block-company-credit table.data.table th {
+    @apply whitespace-nowrap px-2 py-2 text-left text-sm font-semibold;
+}
+
+.block-company-users table.data.table td,
+.block-company-roles table.data.table td,
+.block-company-children table.data.table td,
+.block-company-orders table.data.table td,
+.block-company-credit table.data.table td {
+    @apply px-2 py-2 align-top;
+}
+
+.block-company-users table.data.table tbody tr:nth-child(even),
+.block-company-roles table.data.table tbody tr:nth-child(even),
+.block-company-children table.data.table tbody tr:nth-child(even),
+.block-company-orders table.data.table tbody tr:nth-child(even),
+.block-company-credit table.data.table tbody tr:nth-child(even) {
+    @apply bg-gray-100;
+}

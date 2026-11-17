@@ -11,9 +11,9 @@ $canManage = $block->canManage();
 <div class="block block-company-roles">
     <div class="block-content">
         <?php if ($roles): ?>
-            <div class="table-wrapper">
-                <table class="data table table-company-roles">
-                    <caption class="table-caption"><?= $escaper->escapeHtml(__('Company Roles')) ?></caption>
+            <div class="table-wrapper card mb-4">
+                <table class="data table table-company-roles w-full">
+                    <caption class="sr-only"><?= $escaper->escapeHtml(__('Company Roles')) ?></caption>
                     <thead>
                         <tr>
                             <th scope="col" class="col name"><?= $escaper->escapeHtml(__('Role')) ?></th>
@@ -43,23 +43,43 @@ $canManage = $block->canManage();
                             </td>
                             <?php if ($canManage): ?>
                                 <td class="col actions">
-                                    <button type="button" class="action edit"
-                                            data-role-edit="<?= (int)$role->getId() ?>">
-                                        <span><?= $escaper->escapeHtml(__('Edit')) ?></span>
-                                    </button>
-                                    <?php /* Core's data-post widget asks for confirmation, then posts with the form key. */ ?>
-                                    <button type="button" class="action delete" data-post="<?= $escaper->escapeHtmlAttr(json_encode([
-                                        'action' => $block->getDeleteUrl($role),
-                                        'data' => [
-                                            'confirmation' => true,
-                                            'confirmationMessage' => (string)__(
-                                                'Delete the role "%1"? Its members fall back to the company default role.',
-                                                $role->getRoleName()
-                                            ),
-                                        ],
-                                    ])) ?>">
-                                        <span><?= $escaper->escapeHtml(__('Delete')) ?></span>
-                                    </button>
+                                    <div class="flex items-center justify-end gap-2">
+                                        <button type="button" class="action edit btn btn-secondary size-10 p-2"
+                                                data-role-edit="<?= (int)$role->getId() ?>"
+                                                aria-label="<?= $escaper->escapeHtmlAttr(__('Edit role %1', $role->getRoleName())) ?>"
+                                                title="<?= $escaper->escapeHtmlAttr(__('Edit role %1', $role->getRoleName())) ?>">
+                                            <svg data-icon="pencil" xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                                                 viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                                 stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                                <path d="M12 20h9"/>
+                                                <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L8 18l-4 1 1-4Z"/>
+                                            </svg>
+                                        </button>
+                                        <?php /* Core's data-post widget asks for confirmation, then posts with the form key. */ ?>
+                                        <button type="button" class="action delete btn btn-secondary size-10 p-2"
+                                                aria-label="<?= $escaper->escapeHtmlAttr(__('Delete role %1', $role->getRoleName())) ?>"
+                                                title="<?= $escaper->escapeHtmlAttr(__('Delete role %1', $role->getRoleName())) ?>"
+                                                data-post="<?= $escaper->escapeHtmlAttr(json_encode([
+                                            'action' => $block->getDeleteUrl($role),
+                                            'data' => [
+                                                'confirmation' => true,
+                                                'confirmationMessage' => (string)__(
+                                                    'Delete the role "%1"? Its members fall back to the company default role.',
+                                                    $role->getRoleName()
+                                                ),
+                                            ],
+                                        ])) ?>">
+                                            <svg data-icon="trash" xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                                                 viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                                 stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                                <path d="M3 6h18"/>
+                                                <path d="M8 6V4h8v2"/>
+                                                <path d="M19 6l-1 14H6L5 6"/>
+                                                <path d="M10 11v6"/>
+                                                <path d="M14 11v6"/>
+                                            </svg>
+                                        </button>
+                                    </div>
                                 </td>
                             <?php endif; ?>
                         </tr>
@@ -89,13 +109,13 @@ $canManage = $block->canManage();
                 <div class="field required">
                     <label class="label" for="role_name"><span><?= $escaper->escapeHtml(__('Role Name')) ?></span></label>
                     <div class="control">
-                        <input type="text" name="role[role_name]" id="role_name" class="input-text"
+                        <input type="text" name="role[role_name]" id="role_name" class="input-text form-input w-full"
                                data-validate="{required:true}">
                     </div>
                 </div>
 
                 <div class="field choice">
-                    <input type="checkbox" name="role[is_default]" id="role_is_default" value="1" class="checkbox">
+                    <input type="checkbox" name="role[is_default]" id="role_is_default" value="1" class="checkbox form-checkbox">
                     <label class="label" for="role_is_default">
                         <span><?= $escaper->escapeHtml(__('Give this role to members who have none of their own')) ?></span>
                     </label>
@@ -107,7 +127,7 @@ $canManage = $block->canManage();
                         <div class="control">
                             <?php foreach ($groupPermissions as $permission => $label): ?>
                                 <div class="field choice">
-                                    <input type="checkbox" name="role[permissions][]" class="checkbox permission"
+                                    <input type="checkbox" name="role[permissions][]" class="checkbox permission form-checkbox"
                                            id="perm_<?= $escaper->escapeHtmlAttr($permission) ?>"
                                            value="<?= $escaper->escapeHtmlAttr($permission) ?>">
                                     <label class="label" for="perm_<?= $escaper->escapeHtmlAttr($permission) ?>">
@@ -122,15 +142,15 @@ $canManage = $block->canManage();
 
             <div class="actions-toolbar">
                 <div class="primary">
-                    <button type="submit" class="action save primary">
+                    <button type="submit" class="action save primary btn btn-primary">
                         <span><?= $escaper->escapeHtml(__('Save Role')) ?></span>
                     </button>
                 </div>
                 <div class="secondary">
-                    <button type="button" class="action clear" id="role-form-reset" style="display:none;">
+                    <button type="button" class="action clear btn btn-secondary" id="role-form-reset" style="display:none;">
                         <span><?= $escaper->escapeHtml(__('Cancel')) ?></span>
                     </button>
-                    <a class="action back" href="<?= $escaper->escapeUrl($block->getBackUrl()) ?>">
+                    <a class="action back btn btn-secondary" href="<?= $escaper->escapeUrl($block->getBackUrl()) ?>">
                         <span><?= $escaper->escapeHtml(__('Back')) ?></span>
                     </a>
                 </div>
@@ -138,35 +158,35 @@ $canManage = $block->canManage();
         </form>
 
         <script type="text/javascript">
-            require(['jquery'], function ($) {
+            (() => {
                 'use strict';
 
-                var roles = <?= /* @noEscape */ $block->getRolesJson() ?>,
-                    form = $('#company-role-form'),
-                    title = $('#role-form-title'),
-                    cancel = $('#role-form-reset');
+                const roles = <?= /* @noEscape */ $block->getRolesJson() ?>;
+                const form = document.getElementById('company-role-form');
+                const title = document.getElementById('role-form-title');
+                const cancel = document.getElementById('role-form-reset');
 
                 function fill(role) {
-                    $('#role_id').val(role ? role.role_id : '');
-                    $('#role_name').val(role ? role.role_name : '');
-                    $('#role_is_default').prop('checked', !!(role && role.is_default));
-                    form.find('input.permission').each(function () {
-                        $(this).prop('checked', !!role && role.permissions.indexOf(this.value) !== -1);
+                    document.getElementById('role_id').value = role ? role.role_id : '';
+                    document.getElementById('role_name').value = role ? role.role_name : '';
+                    document.getElementById('role_is_default').checked = !!(role && role.is_default);
+                    form.querySelectorAll('input.permission').forEach((input) => {
+                        input.checked = !!role && role.permissions.includes(input.value);
                     });
-                    title.text(role ? '<?= $escaper->escapeJs(__('Edit Role')) ?>'
-                                    : '<?= $escaper->escapeJs(__('Add a Role')) ?>');
-                    cancel.toggle(!!role);
+                    title.textContent = role ? '<?= $escaper->escapeJs(__('Edit Role')) ?>'
+                                             : '<?= $escaper->escapeJs(__('Add a Role')) ?>';
+                    cancel.style.display = role ? '' : 'none';
                 }
 
-                $('[data-role-edit]').on('click', function () {
-                    fill(roles[$(this).data('role-edit')]);
-                    form[0].scrollIntoView({behavior: 'smooth'});
+                document.querySelectorAll('[data-role-edit]').forEach((button) => {
+                    button.addEventListener('click', () => {
+                        fill(roles[button.dataset.roleEdit]);
+                        form.scrollIntoView({behavior: 'smooth'});
+                    });
                 });
 
-                cancel.on('click', function () {
-                    fill(null);
-                });
-            });
+                cancel.addEventListener('click', () => fill(null));
+            })();
         </script>
     <?php endif; ?>
 </div>

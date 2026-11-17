@@ -27,9 +27,9 @@ $history = $block->getHistory();
         </div>
 
         <?php if ($history): ?>
-            <div class="table-wrapper">
-                <table class="data table table-company-credit">
-                    <caption class="table-caption"><?= $escaper->escapeHtml(__('Recent Movements')) ?></caption>
+            <div class="table-wrapper card mb-4">
+                <table class="data table table-company-credit w-full">
+                    <caption class="sr-only"><?= $escaper->escapeHtml(__('Recent Movements')) ?></caption>
                     <thead>
                         <tr>
                             <th scope="col" class="col date"><?= $escaper->escapeHtml(__('Date')) ?></th>
@@ -76,7 +76,7 @@ $history = $block->getHistory();
 
     <div class="actions-toolbar">
         <div class="secondary">
-            <a class="action back" href="<?= $escaper->escapeUrl($block->getBackUrl()) ?>">
+            <a class="action back btn btn-secondary" href="<?= $escaper->escapeUrl($block->getBackUrl()) ?>">
                 <span><?= $escaper->escapeHtml(__('Back')) ?></span>
             </a>
         </div>

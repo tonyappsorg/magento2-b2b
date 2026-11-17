@@ -9,7 +9,7 @@ This file is the agreed scope — update it, don't re-litigate it. Merchant-faci
 - **All six phases built** (foundation, storefront accounts, roles & permissions, hierarchy roll-up, payment
   restrictions, store credit). Review fixes 2026-10-28 and 2026-10-30 applied; email redesign and QA fixes 2026-11-09;
   B2b core e2e (`b2b-company.spec.js` in the workspace `../e2e/tests/` Playwright suite, 6 tests) added 2026-11-10.
-- Module: `Tonyapps_B2b` / `tonyapps/module-b2b` / 1.0.0 / GPL-3.0-or-later.
+- Module: `Tonyapps_B2b` / `tonyapps/module-b2b` / 1.0.1 / GPL-3.0-or-later.
 
 ### Environment (as developed)
 
@@ -317,7 +317,7 @@ Open questions (status as of the last README):
 Other limitations:
 - Not built from the plan: company-grid member count; Company column in the customer grid (needs a `customer_grid`
   indexer fieldset extension).
-- Hyvä: every storefront page works since 2026-11-16 (Company Orders 500 fixed), but templates still use Luma classes only, so buttons/tables are unstyled there; styling is WORKPLAN item 5 step 4. Checkout on Hyvä is the Luma fallback checkout, where the store-credit method works.
+- Hyvä: storefront account pages are styled for Luma and Hyvä. `Observer\RegisterHyvaTailwindSources` registers installed Tonyapps modules that provide `view/frontend/tailwind/module.css` when `hyva:config:generate` runs; each stylesheet scans its module's storefront templates. Checkout on the DDEV Hyvä store is the Luma fallback checkout, where store credit works.
 - Per WORKPLAN QA log 2026-11-10: child companies created from the storefront can't be deleted there (e2e runs leave
   "E2E Branch" rows; clean with SQL).
 
@@ -345,6 +345,18 @@ vendor/bin/phpunit -c dev/tests/unit/phpunit.xml.dist app/code/Tonyapps/B2b/Test
 - Email screenshots live in `docs/emails/` (export-ignored from the Composer package via `.gitattributes`).
 
 ## Change history
+
+### 2026-11-17 Hyvä storefront styling
+- Added Hyvä button and form-control classes alongside Luma classes across company dashboard, users, roles, children,
+  orders, credit, registration and registration-fieldset templates. Tables use responsive Tailwind utility classes.
+- Added `RegisterHyvaTailwindSources`, which registers installed Tonyapps modules that have a `module.css` during
+  Hyvä's `hyva_config_generate_before` event without a Hyvä PHP dependency.
+- DDEV: Hyvä Tailwind build succeeded; browser checks passed for company, approval, quote, quick-order and requisition
+  list styling. Buttons and inputs had computed Hyvä styles. Follow-up table QA aligned B2B tables with Hyvä's My Orders
+  card, compact cell spacing and alternating gray rows; computed-style browser assertions cover the result. Role actions
+  use accessible inline SVG pencil/trash icon buttons with their existing edit and delete behavior. Replaced the role form's
+  RequireJS/jQuery handler with vanilla JavaScript so role editing works on Hyvä too. The company dashboard presents
+  profile details in responsive cards and a two-column label/value grid, with its navigation actions wrapping cleanly.
 
 - **2026-11-16** — *Company Orders* gave a 500 on Hyvä: Hyvä's layout runs `Orders::_prepareLayout()` twice and the second `createBlock()` of `tonyapps_b2b.company.orders.pager` threw. The block now reuses an existing pager (`OrdersPagerTest`).
 - **2026-11-16** — Released as free software under GPL-3.0-or-later (owner decision): `LICENSE` added,

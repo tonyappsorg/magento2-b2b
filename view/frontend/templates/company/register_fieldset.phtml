@@ -12,7 +12,7 @@
     <legend class="legend"><span><?= $escaper->escapeHtml(__('Company')) ?></span></legend><br>
 
     <div class="field choice">
-        <input type="checkbox" name="company[register]" id="company_register" value="1" class="checkbox">
+        <input type="checkbox" name="company[register]" id="company_register" value="1" class="checkbox form-checkbox">
         <label class="label" for="company_register">
             <span><?= $escaper->escapeHtml(__('I am registering on behalf of a company')) ?></span>
         </label>
@@ -21,7 +21,7 @@
     <div class="field company-name" id="company_name_field" style="display:none;">
         <label class="label" for="company_name"><span><?= $escaper->escapeHtml(__('Company Name')) ?></span></label>
         <div class="control">
-            <input type="text" name="company[name]" id="company_name" class="input-text">
+            <input type="text" name="company[name]" id="company_name" class="input-text form-input w-full">
         </div>
     </div>
 

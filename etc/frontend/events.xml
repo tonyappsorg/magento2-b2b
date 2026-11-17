@@ -5,4 +5,8 @@
         <observer name="tonyapps_b2b_create_company_on_register"
                   instance="Tonyapps\B2b\Observer\CreateCompanyOnRegister"/>
     </event>
+    <event name="hyva_config_generate_before">
+        <observer name="tonyapps_b2b_register_tailwind_sources"
+                  instance="Tonyapps\B2b\Observer\RegisterHyvaTailwindSources"/>
+    </event>
 </config>
